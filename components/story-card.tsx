@@ -647,20 +647,20 @@ export function StoryCard({ story }: StoryCardProps) {
                   >
                     <span className="truncate">⚠️ <span className="hidden sm:inline">{story.content_warning}</span><span className="sm:hidden">{story.content_warning.length > 10 ? story.content_warning.slice(0, 10) + "..." : story.content_warning}</span></span>
                   </Badge>
-                )}
-                  {story.organisations && (
-  <div 
-    className="mt-2"
-    onClick={(e) => e.stopPropagation()}
-  >
-    <OrganisationFollowButton 
-      organisationId={story.organisations.id} 
-      variant="text"
-      className="text-xs"
-    />
-  </div>
-)}
+                )}     
               </div>
+              {story.organisations && (
+                  <div 
+                    className="mt-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <OrganisationFollowButton 
+                      organisationId={story.organisations.id} 
+                      variant="text"  
+                      className="text-xs"
+                    />
+                  </div>
+                )}
             </div>
          </CardHeader>
 
