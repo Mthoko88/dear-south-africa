@@ -638,20 +638,6 @@ export function StoryCard({ story }: StoryCardProps) {
              
               <div className="flex flex-col sm:flex-row gap-1.5 flex-shrink-0 items-end sm:items-center">
                  <div className="flex flex-col">
-                 <div>
-                   <Badge variant="secondary" className={`text-xs max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
-                  <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
-                </Badge>
-                {story.content_warning && (
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs max-w-[120px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color}`}
-                    title={`Content Warning: ${story.content_warning}`}
-                  >
-                    <span className="truncate">⚠️ <span className="hidden sm:inline">{story.content_warning}</span><span className="sm:hidden">{story.content_warning.length > 10 ? story.content_warning.slice(0, 10) + "..." : story.content_warning}</span></span>
-                  </Badge>
-                )}  
-                 </div>
                 <div>
                  {story.organisations && (
                   <div 
@@ -666,6 +652,22 @@ export function StoryCard({ story }: StoryCardProps) {
                   </div>
                 )}
                 </div>
+                   
+                 <div className="gap-1.5 items-end sm:items-center">
+                   <Badge variant="secondary" className={`text-xs max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
+                  <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
+                </Badge>
+                {story.content_warning && (
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs max-w-[120px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color}`}
+                    title={`Content Warning: ${story.content_warning}`}
+                  >
+                    <span className="truncate">⚠️ <span className="hidden sm:inline">{story.content_warning}</span><span className="sm:hidden">{story.content_warning.length > 10 ? story.content_warning.slice(0, 10) + "..." : story.content_warning}</span></span>
+                  </Badge>
+                )}  
+                 </div>
+                
               </div>
                  </div>
             </div>
