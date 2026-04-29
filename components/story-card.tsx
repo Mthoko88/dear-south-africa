@@ -635,8 +635,10 @@ export function StoryCard({ story }: StoryCardProps) {
                   </>
                 )}
               </div>
+             
               <div className="flex flex-col sm:flex-row gap-1.5 flex-shrink-0 items-end sm:items-center">
-                <Badge variant="secondary" className={`text-xs max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
+                 <div>
+                   <Badge variant="secondary" className={`text-xs max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
                   <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
                 </Badge>
                 {story.content_warning && (
@@ -648,6 +650,8 @@ export function StoryCard({ story }: StoryCardProps) {
                     <span className="truncate">⚠️ <span className="hidden sm:inline">{story.content_warning}</span><span className="sm:hidden">{story.content_warning.length > 10 ? story.content_warning.slice(0, 10) + "..." : story.content_warning}</span></span>
                   </Badge>
                 )}  
+                 </div>
+                <div>
                  {story.organisations && (
                   <div 
                     className="mt-2"
@@ -660,6 +664,7 @@ export function StoryCard({ story }: StoryCardProps) {
                     />
                   </div>
                 )}
+                </div>
               </div>
             </div>
          </CardHeader>
