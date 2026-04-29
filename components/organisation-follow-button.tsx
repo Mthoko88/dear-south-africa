@@ -29,10 +29,16 @@ export function OrganisationFollowButton({
   const { toast } = useToast()
 
   useEffect(() => {
-    checkFollowStatus()
-  }, [organisationId])
+  const getUserAndStatus = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    setCurrentUserId(user?.id || null)
+    await checkFollowStatus(user?.id)
+  }
 
-  const checkFollowStatus = async () => {
+  getUserAndStatus()
+}, [organisationId])
+
+ const checkFollowStatus = async (userId?: string | null) => {
     try {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser()
@@ -47,7 +53,7 @@ export function OrganisationFollowButton({
       setFollowerCount(count || 0)
 
       // Check if current user is following
-      if (user) {
+      if (userId) {
         const { data } = await supabase
           .from("organisation_follows")
           .select("id")
