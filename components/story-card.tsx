@@ -575,8 +575,6 @@ export function StoryCard({ story }: StoryCardProps) {
                             </div>
                           </>
                         )}
-                        <span className="hidden sm:inline">•</span>
-                        
                       </div>
                     </div>
                   </>
@@ -651,13 +649,6 @@ export function StoryCard({ story }: StoryCardProps) {
                   </Badge>
                 )}
               </div>
-              <div onClick={(e) => e.stopPropagation()}>
-                          <OrganisationFollowButton 
-                            organisationId={story.organisations.id} 
-                            variant="text"
-                            className="text-xs"
-                          />
-                        </div>
             </div>
           </CardHeader>
 
