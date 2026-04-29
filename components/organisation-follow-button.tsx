@@ -177,7 +177,7 @@ export function OrganisationFollowButton({
         {isFollowing ? "Following" : "Follow"}
       </Button>
       {showCount && (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-primary font-medium cursor-pointer hover:underline">
           {followerCount} {followerCount === 1 ? "follower" : "followers"}
         </span>
       )}
