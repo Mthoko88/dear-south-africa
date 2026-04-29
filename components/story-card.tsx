@@ -637,22 +637,7 @@ export function StoryCard({ story }: StoryCardProps) {
               </div>
              
               <div className="flex flex-col sm:flex-row gap-1.5 flex-shrink-0 items-end sm:items-center">
-                 <div className="flex flex-col">
-                <div>
-                 {story.organisations && (
-                  <div 
-                    className="mt-2"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <OrganisationFollowButton 
-                      organisationId={story.organisations.id} 
-                      variant="text"  
-                      className="text-xs"
-                    />
-                  </div>
-                )}
-                </div>
-                   
+                 <div className="flex flex-col gap-1.5 items-end">                   
                  <div className="gap-1.5 items-end sm:items-center">
                    <Badge variant="secondary" className={`text-xs max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
                   <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
@@ -667,7 +652,20 @@ export function StoryCard({ story }: StoryCardProps) {
                   </Badge>
                 )}  
                  </div>
-                
+                    <div>
+                 {story.organisations && (
+                  <div 
+                    className="mt-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <OrganisationFollowButton 
+                      organisationId={story.organisations.id} 
+                      variant="text"  
+                      className="text-xs"
+                    />
+                  </div>
+                )}
+                </div>
               </div>
                  </div>
             </div>
