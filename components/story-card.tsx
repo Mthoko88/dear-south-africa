@@ -647,9 +647,8 @@ export function StoryCard({ story }: StoryCardProps) {
                   >
                     <span className="truncate">⚠️ <span className="hidden sm:inline">{story.content_warning}</span><span className="sm:hidden">{story.content_warning.length > 10 ? story.content_warning.slice(0, 10) + "..." : story.content_warning}</span></span>
                   </Badge>
-                )}     
-              </div>
-              {story.organisations && (
+                )}  
+                 {story.organisations && (
                   <div 
                     className="mt-2"
                     onClick={(e) => e.stopPropagation()}
@@ -661,6 +660,7 @@ export function StoryCard({ story }: StoryCardProps) {
                     />
                   </div>
                 )}
+              </div>
             </div>
          </CardHeader>
 
