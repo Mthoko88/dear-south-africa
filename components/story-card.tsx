@@ -650,7 +650,7 @@ export function StoryCard({ story }: StoryCardProps) {
                   </Badge>
                 )}
               </div>
-              <div>            
+              <div className=" items-end">            
               {story.organisations && (
                           <div onClick={(e) => e.stopPropagation()}>
                             <OrganisationFollowButton 
