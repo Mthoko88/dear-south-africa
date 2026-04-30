@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -573,6 +575,14 @@ export function StoryCard({ story }: StoryCardProps) {
                             </div>
                           </>
                         )}
+                        <span className="hidden sm:inline">•</span>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <OrganisationFollowButton 
+                            organisationId={story.organisations.id} 
+                            variant="text"
+                            className="text-xs"
+                          />
+                        </div>
                       </div>
                     </div>
                   </>
@@ -648,18 +658,6 @@ export function StoryCard({ story }: StoryCardProps) {
                 )}
               </div>
             </div>
-            <span className="hidden sm:inline">•</span>
-                        
-                          {story.organisations && (
-                              <div onClick={(e) => e.stopPropagation()}>
-                                <OrganisationFollowButton 
-                                  organisationId={story.organisations.id}
-                                  variant="text"
-                                  className="text-xs"
-                                />
-                              </div>
-                            )}
-                        
           </CardHeader>
 
 <CardContent className="pt-0">
