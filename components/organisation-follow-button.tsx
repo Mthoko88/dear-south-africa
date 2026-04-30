@@ -29,46 +29,40 @@ export function OrganisationFollowButton({
   const { toast } = useToast()
 
   useEffect(() => {
-  const getUserAndStatus = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    setCurrentUserId(user?.id || null)
-    await checkFollowStatus(user?.id)
-  }
+    const init = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        const userId = user?.id || null
+        setCurrentUserId(userId)
 
-  getUserAndStatus()
-}, [organisationId])
-
- const checkFollowStatus = async (userId?: string | null) => {
-    try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
-      setCurrentUserId(user?.id || null)
-
-      // Get follower count
-      const { count } = await supabase
-        .from("organisation_follows")
-        .select("*", { count: "exact", head: true })
-        .eq("organisation_id", organisationId)
-
-      setFollowerCount(count || 0)
-
-      // Check if current user is following
-      if (userId) {
-        const { data } = await supabase
+        // Get follower count
+        const { count } = await supabase
           .from("organisation_follows")
-          .select("id")
+          .select("*", { count: "exact", head: true })
           .eq("organisation_id", organisationId)
-          .eq("user_id", user.id)
-          .maybeSingle()
 
-        setIsFollowing(!!data)
+        setFollowerCount(count || 0)
+
+        // Check follow status
+        if (userId) {
+          const { data } = await supabase
+            .from("organisation_follows")
+            .select("id")
+            .eq("organisation_id", organisationId)
+            .eq("user_id", userId)
+            .maybeSingle()
+
+          setIsFollowing(!!data)
+        }
+      } catch (error) {
+        console.error("Error initializing follow button:", error)
+      } finally {
+        setLoading(false)
       }
-    } catch (error) {
-      console.error("Error checking follow status:", error)
-    } finally {
-      setLoading(false)
     }
-  }
+
+    init()
+  }, [organisationId])
 
   const handleFollow = async () => {
     if (!currentUserId) {
@@ -95,10 +89,6 @@ export function OrganisationFollowButton({
 
         setIsFollowing(false)
         setFollowerCount((prev) => Math.max(0, prev - 1))
-        toast({
-          title: "Unfollowed",
-          description: "You will no longer receive updates from this organisation.",
-        })
       } else {
         // Follow
         const { error } = await supabase
@@ -112,16 +102,12 @@ export function OrganisationFollowButton({
 
         setIsFollowing(true)
         setFollowerCount((prev) => prev + 1)
-        toast({
-          title: "Following!",
-          description: "You will now receive updates from this organisation.",
-        })
       }
     } catch (error) {
       console.error("Error toggling follow:", error)
       toast({
         title: "Error",
-        description: "Could not update follow status. Please try again.",
+        description: "Could not update follow status.",
         variant: "destructive",
       })
     } finally {
@@ -129,6 +115,7 @@ export function OrganisationFollowButton({
     }
   }
 
+  // Loading state
   if (loading) {
     return variant === "text" ? (
       <span className={`text-muted-foreground ${className}`}>...</span>
@@ -139,13 +126,15 @@ export function OrganisationFollowButton({
     )
   }
 
-  // Text variant - just shows follower count with clickable follow text
+  // TEXT VARIANT
   if (variant === "text") {
     return (
       <div className={`flex items-center gap-2 text-sm ${className}`}>
         <span className="text-muted-foreground">
-          <strong className="text-foreground">{followerCount}</strong> {followerCount === 1 ? "follower" : "followers"}
+          <strong className="text-foreground">{followerCount}</strong>{" "}
+          {followerCount === 1 ? "follower" : "followers"}
         </span>
+
         {currentUserId && (
           <>
             <span className="text-muted-foreground">•</span>
@@ -164,7 +153,7 @@ export function OrganisationFollowButton({
     )
   }
 
-  // Button variant
+  // BUTTON VARIANT
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <Button
@@ -182,8 +171,9 @@ export function OrganisationFollowButton({
         )}
         {isFollowing ? "Following" : "Follow"}
       </Button>
+
       {showCount && (
-        <span className="text-primary font-medium cursor-pointer hover:underline">
+        <span className="text-sm text-muted-foreground">
           {followerCount} {followerCount === 1 ? "follower" : "followers"}
         </span>
       )}
