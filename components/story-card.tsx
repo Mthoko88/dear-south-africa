@@ -650,7 +650,7 @@ export function StoryCard({ story }: StoryCardProps) {
                   </Badge>
                 )}
               </div>
-               <div className="mt-1 pl-4">            
+               <div className="mt-1 pl-10">            
               {story.organisations && (
                           <div onClick={(e) => e.stopPropagation()} >
                             <OrganisationFollowButton 
