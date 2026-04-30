@@ -656,6 +656,7 @@ export function StoryCard({ story }: StoryCardProps) {
                             <OrganisationFollowButton 
                               organisationId={story.organisations.id}
                               variant="text"
+                              className="text-xs"
                             />
                           </div>
                         )}
