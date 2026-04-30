@@ -40,21 +40,7 @@ export default function HomePage() {
         <Sidebar />
 
         <main className="flex-1 p-4 md:p-6 space-y-6 max-w-5xl">
-          /* {/* Welcome Section */}
-          <div className="text-center space-y-4 py-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">Welcome to Dear South Africa</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              A safe space where ordinary South Africans share their stories, connect with others, and find healing
-              through community support.
-            </p>
-
-            <div className="pt-4">
-              <CreateStoryButton />
-              <p className="text-sm text-muted-foreground mt-2">
-                Share your story and help someone else feel less alone
-              </p>
-            </div>
-          </div> */
+        
 
           {/* Main Content */}
           <Tabs defaultValue="stories" className="w-full">
