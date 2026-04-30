@@ -662,7 +662,7 @@ export function StoryCard({ story }: StoryCardProps) {
                       organisationId={story.organisations.id}
                       showCount
                       variant="text"
-                      classname="text-xs"
+                      classname="text-sm"
                     />
                   </div>
                 )}
