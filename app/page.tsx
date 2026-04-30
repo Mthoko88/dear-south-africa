@@ -44,6 +44,45 @@ export default function HomePage() {
 
           {/* Main Content */}
          
+
+            <TabsContent value="stories" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <EnhancedStoryFeed />
+                </div>
+                <div className="hidden lg:block">
+                  <StoryRecommendations />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="trending" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <EnhancedStoryFeed />
+                </div>
+                <div className="hidden lg:block">
+                  <StoryRecommendations />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="community" className="space-y-6">
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <p className="text-muted-foreground">Community features coming soon</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="support" className="space-y-6">
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <p className="text-muted-foreground">Support resources coming soon</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </main>
       </div>
     </div>
