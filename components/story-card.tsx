@@ -650,7 +650,9 @@ export function StoryCard({ story }: StoryCardProps) {
                   </Badge>
                 )}
               </div>
-              <div className="text-end gap-1">            
+             
+             </div>
+               <div className="text-end gap-1">            
               {story.organisations && (
                           <div onClick={(e) => e.stopPropagation()} >
                             <OrganisationFollowButton 
@@ -661,7 +663,6 @@ export function StoryCard({ story }: StoryCardProps) {
                           </div>
                         )}
               </div>
-             </div>
             </div>
             
           </CardHeader>
