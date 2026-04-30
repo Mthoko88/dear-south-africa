@@ -663,9 +663,9 @@ export function StoryCard({ story }: StoryCardProps) {
               </div>
                  <hr className="border-gray-100"></hr>
              </div>
-              <hr className="border-gray-100"></hr>
+              
             </div>
-            
+            <hr className="border-gray-100"></hr>
           </CardHeader>
 
 <CardContent className="pt-0">
