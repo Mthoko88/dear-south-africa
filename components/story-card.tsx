@@ -651,13 +651,15 @@ export function StoryCard({ story }: StoryCardProps) {
               </div>
             </div>
             <span className="hidden sm:inline">•</span>
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <OrganisationFollowButton 
-                            organisationId={story.organisations.id} 
-                            variant="text"
-                            className="text-xs"
-                          />
-                        </div>
+                        {story.organisations && (
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <OrganisationFollowButton 
+                              organisationId={story.organisations.id}
+                              variant="text"
+                              className="text-xs"
+                            />
+                          </div>
+                        )}
           </CardHeader>
 
 <CardContent className="pt-0">
