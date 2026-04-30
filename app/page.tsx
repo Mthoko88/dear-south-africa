@@ -43,7 +43,25 @@ export default function HomePage() {
         
 
           {/* Main Content */}
-         
+         <Tabs defaultValue="stories" className="w-full">
+            <TabsList className="w-full flex">
+              <TabsTrigger value="stories" className="flex-1 flex items-center justify-center gap-1 text-xs sm:text-sm px-2 sm:px-4">
+                <BookOpen className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline truncate">Stories</span>
+              </TabsTrigger>
+              <TabsTrigger value="trending" className="flex-1 flex items-center justify-center gap-1 text-xs sm:text-sm px-2 sm:px-4">
+                <TrendingUp className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline truncate">Trending</span>
+              </TabsTrigger>
+              <TabsTrigger value="community" className="flex-1 flex items-center justify-center gap-1 text-xs sm:text-sm px-2 sm:px-4">
+                <Users className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline truncate">Community</span>
+              </TabsTrigger>
+              <TabsTrigger value="support" className="flex-1 flex items-center justify-center gap-1 text-xs sm:text-sm px-2 sm:px-4">
+                <Heart className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline truncate">Support</span>
+              </TabsTrigger>
+            </TabsList>
 
             <TabsContent value="stories" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
