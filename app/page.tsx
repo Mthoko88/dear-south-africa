@@ -43,64 +43,7 @@ export default function HomePage() {
         
 
           {/* Main Content */}
-          <Tabs defaultValue="stories" className="w-full">
-            <TabsList className="w-full flex">
-              <TabsTrigger value="stories" className="flex-1 flex items-center justify-center gap-1 text-xs sm:text-sm px-2 sm:px-4">
-                <BookOpen className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline truncate">Stories</span>
-              </TabsTrigger>
-              <TabsTrigger value="trending" className="flex-1 flex items-center justify-center gap-1 text-xs sm:text-sm px-2 sm:px-4">
-                <TrendingUp className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline truncate">Trending</span>
-              </TabsTrigger>
-              <TabsTrigger value="community" className="flex-1 flex items-center justify-center gap-1 text-xs sm:text-sm px-2 sm:px-4">
-                <Users className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline truncate">Community</span>
-              </TabsTrigger>
-              <TabsTrigger value="support" className="flex-1 flex items-center justify-center gap-1 text-xs sm:text-sm px-2 sm:px-4">
-                <Heart className="h-4 w-4 flex-shrink-0" />
-                <span className="hidden sm:inline truncate">Support</span>
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="stories" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                  <EnhancedStoryFeed />
-                </div>
-                <div className="hidden lg:block">
-                  <StoryRecommendations />
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="trending" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                  <EnhancedStoryFeed />
-                </div>
-                <div className="hidden lg:block">
-                  <StoryRecommendations />
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="community" className="space-y-6">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-muted-foreground">Community features coming soon</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="support" className="space-y-6">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-muted-foreground">Support resources coming soon</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+         
         </main>
       </div>
     </div>
