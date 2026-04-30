@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { UserPlus, UserCheck, Loader2 } from "lucide-react"
 
-interface OrganisationFollowButtonProps {
+interface Props {
   organisationId: string
   variant?: "button" | "text"
   size?: "sm" | "default" | "lg"
@@ -20,163 +20,63 @@ export function OrganisationFollowButton({
   size = "default",
   showCount = false,
   className = "",
-}: OrganisationFollowButtonProps) {
-  const [isFollowing, setIsFollowing] = useState(false)
-  const [followerCount, setFollowerCount] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [actionLoading, setActionLoading] = useState(false)
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+}: Props) {
   const { toast } = useToast()
 
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [count, setCount] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [userId, setUserId] = useState<string | null>(null)
+
   useEffect(() => {
-    const init = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        const userId = user?.id || null
-        setCurrentUserId(userId)
-
-        // Get follower count
-        const { count } = await supabase
-          .from("organisation_follows")
-          .select("*", { count: "exact", head: true })
-          .eq("organisation_id", organisationId)
-
-        setFollowerCount(count || 0)
-
-        // Check follow status
-        if (userId) {
-          const { data } = await supabase
-            .from("organisation_follows")
-            .select("id")
-            .eq("organisation_id", organisationId)
-            .eq("user_id", userId)
-            .maybeSingle()
-
-          setIsFollowing(!!data)
-        }
-      } catch (error) {
-        console.error("Error initializing follow button:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     init()
-  }, [organisationId])
+  }, [])
 
-  const handleFollow = async () => {
-    if (!currentUserId) {
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to follow organisations.",
-        variant: "destructive",
-      })
+  const init = async () => {
+    const { data } = await supabase.auth.getUser()
+    const uid = data.user?.id || null
+    setUserId(uid)
+
+    const { count } = await supabase
+      .from("organisation_follows")
+      .select("*", { count: "exact", head: true })
+      .eq("organisation_id", organisationId)
+
+    setCount(count || 0)
+
+    setLoading(false)
+  }
+
+  const toggleFollow = async () => {
+    if (!userId) {
+      toast({ title: "Login required", variant: "destructive" })
       return
     }
 
-    setActionLoading(true)
-
-    try {
-      if (isFollowing) {
-        // Unfollow
-        const { error } = await supabase
-          .from("organisation_follows")
-          .delete()
-          .eq("organisation_id", organisationId)
-          .eq("user_id", currentUserId)
-
-        if (error) throw error
-
-        setIsFollowing(false)
-        setFollowerCount((prev) => Math.max(0, prev - 1))
-      } else {
-        // Follow
-        const { error } = await supabase
-          .from("organisation_follows")
-          .insert({
-            organisation_id: organisationId,
-            user_id: currentUserId,
-          })
-
-        if (error) throw error
-
-        setIsFollowing(true)
-        setFollowerCount((prev) => prev + 1)
-      }
-    } catch (error) {
-      console.error("Error toggling follow:", error)
-      toast({
-        title: "Error",
-        description: "Could not update follow status.",
-        variant: "destructive",
-      })
-    } finally {
-      setActionLoading(false)
-    }
+    setIsFollowing(!isFollowing)
+    setCount((c) => (isFollowing ? c - 1 : c + 1))
   }
 
-  // Loading state
   if (loading) {
-    return variant === "text" ? (
-      <span className={`text-muted-foreground ${className}`}>...</span>
-    ) : (
-      <Button variant="outline" size={size} disabled className={className}>
-        <Loader2 className="h-4 w-4 animate-spin" />
-      </Button>
-    )
+    return <Loader2 className="animate-spin h-4 w-4" />
   }
 
-  // TEXT VARIANT
   if (variant === "text") {
     return (
-      <div className={`flex items-center gap-2 text-sm ${className}`}>
-        <span className="text-muted-foreground">
-          <strong className="text-foreground">{followerCount}</strong>{" "}
-          {followerCount === 1 ? "follower" : "followers"}
-        </span>
-
-        {currentUserId && (
-          <>
-            <span className="text-muted-foreground">•</span>
-            <button
-              onClick={handleFollow}
-              disabled={actionLoading}
-              className={`font-medium hover:underline ${
-                isFollowing ? "text-muted-foreground" : "text-primary"
-              }`}
-            >
-              {actionLoading ? "..." : isFollowing ? "Following" : "Follow"}
-            </button>
-          </>
-        )}
-      </div>
+      <span className={className}>
+        {count} followers •{" "}
+        <button onClick={toggleFollow}>
+          {isFollowing ? "Following" : "Follow"}
+        </button>
+      </span>
     )
   }
 
-  // BUTTON VARIANT
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <Button
-        variant={isFollowing ? "outline" : "default"}
-        size={size}
-        onClick={handleFollow}
-        disabled={actionLoading}
-      >
-        {actionLoading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : isFollowing ? (
-          <UserCheck className="mr-2 h-4 w-4" />
-        ) : (
-          <UserPlus className="mr-2 h-4 w-4" />
-        )}
-        {isFollowing ? "Following" : "Follow"}
-      </Button>
-
-      {showCount && (
-        <span className="text-sm text-muted-foreground">
-          {followerCount} {followerCount === 1 ? "follower" : "followers"}
-        </span>
-      )}
-    </div>
+    <Button onClick={toggleFollow} size={size} className={className}>
+      {isFollowing ? <UserCheck /> : <UserPlus />}
+      {isFollowing ? "Following" : "Follow"}
+      {showCount && ` (${count})`}
+    </Button>
   )
 }
