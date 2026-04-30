@@ -652,7 +652,7 @@ export function StoryCard({ story }: StoryCardProps) {
               </div>
               <div>            
               {story.organisations && (
-                          <div onClick={(e) => e.stopPropagation()} className="text-end">
+                          <div onClick={(e) => e.stopPropagation()} className="text-end items-end">
                             <OrganisationFollowButton 
                               organisationId={story.organisations.id}
                               variant="text"
