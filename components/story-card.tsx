@@ -649,7 +649,7 @@ export function StoryCard({ story }: StoryCardProps) {
               </div>
             </div>
             <span className="hidden sm:inline">•</span>
-                        <div onClick={(e) => e.stopPropagation()}>
+                        
                           {story.organisations && (
                               <div onClick={(e) => e.stopPropagation()}>
                                 <OrganisationFollowButton 
@@ -659,7 +659,7 @@ export function StoryCard({ story }: StoryCardProps) {
                                 />
                               </div>
                             )}
-                        </div>
+                        
           </CardHeader>
 
 <CardContent className="pt-0">
