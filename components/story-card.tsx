@@ -634,7 +634,8 @@ export function StoryCard({ story }: StoryCardProps) {
                     </div>
                   </>
                 )}
-              </div>
+              </div> 
+              <div> 
               <div className="flex flex-col sm:flex-row gap-1.5 flex-shrink-0 items-end sm:items-center">
                 <Badge variant="secondary" className={`text-xs max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
                   <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
@@ -649,9 +650,8 @@ export function StoryCard({ story }: StoryCardProps) {
                   </Badge>
                 )}
               </div>
-            </div>
-            <span className="hidden sm:inline">•</span>
-                        {story.organisations && (
+              <div>            
+              {story.organisations && (
                           <div onClick={(e) => e.stopPropagation()}>
                             <OrganisationFollowButton 
                               organisationId={story.organisations.id}
@@ -660,6 +660,10 @@ export function StoryCard({ story }: StoryCardProps) {
                             />
                           </div>
                         )}
+              </div>
+             </div>
+            </div>
+            
           </CardHeader>
 
 <CardContent className="pt-0">
