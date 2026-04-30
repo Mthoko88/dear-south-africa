@@ -635,7 +635,7 @@ export function StoryCard({ story }: StoryCardProps) {
                   </>
                 )}
               </div> 
-              <div> 
+              <div className="items-end"> 
               <div className="flex flex-col sm:flex-row gap-1.5 flex-shrink-0 items-end sm:items-center">
                 <Badge variant="secondary" className={`text-xs max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
                   <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
