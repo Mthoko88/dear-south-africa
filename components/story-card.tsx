@@ -656,6 +656,17 @@ export function StoryCard({ story }: StoryCardProps) {
                   </Badge>
                 )}
               </div>
+               <div className="mt-1">            
+              {story.organisations && (
+                          <div onClick={(e) => e.stopPropagation()} >
+                            <OrganisationFollowButton 
+                              organisationId={story.organisations.id}
+                              variant="text"
+                              className="text-xs"
+                            />
+                          </div>
+                        )}
+              </div>
             </div>
           </CardHeader>
 
