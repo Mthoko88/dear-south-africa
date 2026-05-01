@@ -644,7 +644,7 @@ export function StoryCard({ story }: StoryCardProps) {
                   <Badge 
                     variant="outline" 
                     className={`text-xs max-w-[120px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color}`}
-                    title={`Content Warning: ${story.content_warning}`
+                    title={`Content Warning: ${story.content_warning}`}
                   >
                     <span className="truncate">⚠️ <span className="hidden sm:inline">{story.content_warning}</span><span className="sm:hidden">{story.content_warning.length > 10 ? story.content_warning.slice(0, 10) + "..." : story.content_warning}</span></span>
                   </Badge>
