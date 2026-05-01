@@ -644,13 +644,13 @@ export function StoryCard({ story }: StoryCardProps) {
                   <Badge 
                     variant="outline" 
                     className={`text-xs max-w-[120px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color}`}
-                    title={`Content Warning: ${story.content_warning}`}
+                    title={`Content Warning: ${story.content_warning}`
                   >
                     <span className="truncate">⚠️ <span className="hidden sm:inline">{story.content_warning}</span><span className="sm:hidden">{story.content_warning.length > 10 ? story.content_warning.slice(0, 10) + "..." : story.content_warning}</span></span>
                   </Badge>
                 )}
               </div>
-               <div className="mt-1 pl-9">            
+               <div className="mt-2 items-start">            
               {story.organisations && (
                           <div onClick={(e) => e.stopPropagation()} >
                             <OrganisationFollowButton 
@@ -665,7 +665,7 @@ export function StoryCard({ story }: StoryCardProps) {
              </div>
               
             </div>
-            <hr className="border-gray-800 mt-6 mb-2"></hr>
+           
           </CardHeader>
 
 <CardContent className="pt-0">
