@@ -661,9 +661,7 @@ export function StoryCard({ story }: StoryCardProps) {
                           </div>
                         )}
               </div>
-                
              </div>
-              
             </div>
            
           </CardHeader>
