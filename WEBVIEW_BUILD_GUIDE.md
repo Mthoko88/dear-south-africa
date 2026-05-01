@@ -14,21 +14,21 @@ This approach loads your live website in a native Android wrapper - no build err
 ### Step 1: Install Capacitor
 In your terminal (in the Dear SA folder):
 
-```bash
+\`\`\`bash
 npm install @capacitor/core @capacitor/cli @capacitor/android
-```
+\`\`\`
 
 ### Step 2: Add Android Platform
-```bash
+\`\`\`bash
 npx cap add android
-```
+\`\`\`
 
 This creates the `android` folder with your Android project.
 
 ### Step 3: Open in Android Studio
-```bash
+\`\`\`bash
 npx cap open android
-```
+\`\`\`
 
 Android Studio opens automatically with your project.
 

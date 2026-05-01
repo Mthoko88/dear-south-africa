@@ -575,14 +575,13 @@ export function StoryCard({ story }: StoryCardProps) {
                             </div>
                           </>
                         )}
-                        <span className="hidden sm:inline">•</span>
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <OrganisationFollowButton 
-                            organisationId={story.organisations.id} 
-                            variant="text"
-                            className="text-xs"
-                          />
-                        </div>
+                      </div>
+                      <div onClick={(e) => e.stopPropagation()} className="mt-1">
+                        <OrganisationFollowButton 
+                          organisationId={story.organisations.id} 
+                          variant="text"
+                          className="text-xs"
+                        />
                       </div>
                     </div>
                   </>
