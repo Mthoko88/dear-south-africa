@@ -693,7 +693,7 @@ export function StoryCard({ story }: StoryCardProps) {
                     href={story.source_url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline truncate"
+                    className="text-primary font-serif hover:underline truncate"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {new URL(story.source_url).hostname}
