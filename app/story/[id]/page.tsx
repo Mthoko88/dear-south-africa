@@ -129,7 +129,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
                 )}
               </div>
 
-              <CardTitle className="text-2xl md:text-3xl font-bold leading-tight">{story.title}</CardTitle>
+              <CardTitle className="text-2xl md:text-3xl font-serif font-bold leading-tight">{story.title}</CardTitle>
 
               {/* Author Info */}
               <div className="flex items-center justify-between pt-4">
@@ -221,7 +221,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
 
           {/* Story Content */}
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 font-serif">
               <StoryContentGate
                 content={story.content || ""}
                 audioUrl={story.audio_url}
