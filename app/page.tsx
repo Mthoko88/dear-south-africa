@@ -43,8 +43,8 @@ export default function HomePage() {
         {/* Welcome Section */}
           <div className="text-center space-y-4 py-8">
            
-            <div className="pt-4 bg-blue-200">
-              <CreateStoryButton />
+            <div className="pt-4">
+              <CreateStoryButton className="bg-blue-200" />
              
             </div>
           </div>
