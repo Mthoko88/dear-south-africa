@@ -41,9 +41,9 @@ export default function HomePage() {
 
         <main className="flex-1 p-4 md:p-6 space-y-6 max-w-5xl">
         {/* Welcome Section */}
-          <div className="text-center space-y-4 py-8 bg-blue-200">
+          <div className="text-center space-y-4 py-8">
            
-            <div className="pt-4">
+            <div className="pt-4 bg-blue-200">
               <CreateStoryButton />
              
             </div>
