@@ -40,7 +40,16 @@ export default function HomePage() {
         <Sidebar />
 
         <main className="flex-1 p-4 md:p-6 space-y-6 max-w-5xl">
-        
+        {/* Welcome Section */}
+          <div className="text-center space-y-4 py-8">
+           
+            <div className="pt-4">
+              <CreateStoryButton />
+              <p className="text-sm text-muted-foreground mt-2">
+                Share your story 
+              </p>
+            </div>
+          </div>
 
           {/* Main Content */}
          <Tabs defaultValue="stories" className="w-full">
