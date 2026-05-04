@@ -45,9 +45,7 @@ export default function HomePage() {
            
             <div className="pt-4">
               <CreateStoryButton />
-              <p className="text-sm text-muted-foreground mt-2">
-                Share your story 
-              </p>
+             
             </div>
           </div>
 
