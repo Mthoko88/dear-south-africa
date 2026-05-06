@@ -1,5 +1,5 @@
 import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+
 
 export const maxDuration = 30
 
@@ -46,7 +46,7 @@ ${content}`
 
   try {
     const { text } = await generateText({
-      model: openai("gpt-4o-mini"),
+      model: "openai/gpt-4o-mini",
       prompt,
       maxTokens: 3000,
       temperature: 0.3, // Lower temperature for more consistent, focused rewrites
