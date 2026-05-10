@@ -1,5 +1,6 @@
 "use client"
 
+import { upload } from "@vercel/blob/client"
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Mic, Square, Trash2, Upload } from "lucide-react"
@@ -31,9 +32,10 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mediaRecorder = new MediaRecorder(stream)
-      mediaRecorderRef.current = mediaRecorder
-      chunksRef.current = []
+      const mediaRecorder = new MediaRecorder(stream, {
+  mimeType: "audio/webm;codecs=opus",
+  audioBitsPerSecond: 64000,
+})
 
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
@@ -49,7 +51,7 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
         stream.getTracks().forEach((track) => track.stop())
       }
 
-      mediaRecorder.start()
+      mediaRecorder.start(1000)
       setIsRecording(true)
       setDuration(0)
 
@@ -89,44 +91,50 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
   }
 
   const uploadRecording = async () => {
-    if (!audioBlob) return
+  if (!audioBlob) return
 
-    setIsUploading(true)
-    try {
-      const formData = new FormData()
-      const fileName = `voice-story-${Date.now()}.webm`
-      formData.append("audio", audioBlob, fileName)
+  setIsUploading(true)
 
-      const response = await fetch("/api/upload-audio", {
-        method: "POST",
-        body: formData,
-      })
+  try {
+    const fileName = `voice-story-${Date.now()}.webm`
 
-      if (!response.ok) throw new Error("Upload failed")
+    const uploadedBlob = await upload(fileName, audioBlob, {
+      access: "public",
+      handleUploadUrl: "/api/upload-audio",
+    })
 
-      const data = await response.json()
-      onAudioReady(data.url, duration)
+    onAudioReady(uploadedBlob.url, duration)
 
-      toast({
-        title: "Recording uploaded",
-        description: "Now add a title for your story",
-      })
-    } catch (error) {
-      toast({
-        title: "Upload failed",
-        description: "Please try recording again",
-        variant: "destructive",
-      })
-    } finally {
-      setIsUploading(false)
-    }
+    toast({
+      title: "Recording uploaded",
+      description: "Now add a title for your story",
+    })
+  } catch (error) {
+    console.error(error)
+
+    toast({
+      title: "Upload failed",
+      description: "Please try again",
+      variant: "destructive",
+    })
+  } finally {
+    setIsUploading(false)
   }
+}
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, "0")}`
+  const hrs = Math.floor(seconds / 3600)
+  const mins = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
+
+  if (hrs > 0) {
+    return `${hrs}:${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`
   }
+
+  return `${mins}:${secs.toString().padStart(2, "0")}`
+}
 
   return (
     <div className="flex flex-col items-center gap-6 py-8">
