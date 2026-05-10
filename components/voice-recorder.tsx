@@ -36,6 +36,19 @@ export function VoiceRecorder({
     }
   }, [audioUrl])
 
+  const startTimer = () => {
+    timerRef.current = setInterval(() => {
+      setDuration((prev) => prev + 1)
+    }, 1000)
+  }
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+  }
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -69,16 +82,14 @@ export function VoiceRecorder({
         stream.getTracks().forEach((track) => track.stop())
       }
 
-      // Save chunks every second
+      // Capture chunks every second
       mediaRecorder.start(1000)
 
       setIsRecording(true)
       setIsPaused(false)
       setDuration(0)
 
-      timerRef.current = setInterval(() => {
-        setDuration((prev) => prev + 1)
-      }, 1000)
+      startTimer()
 
       toast({
         title: "Recording started",
@@ -89,7 +100,7 @@ export function VoiceRecorder({
 
       toast({
         title: "Microphone access denied",
-        description: "Please allow microphone access",
+        description: "Please allow microphone access to record",
         variant: "destructive",
       })
     }
@@ -102,10 +113,7 @@ export function VoiceRecorder({
       setIsRecording(false)
       setIsPaused(false)
 
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-        timerRef.current = null
-      }
+      stopTimer()
     }
   }
 
@@ -115,11 +123,9 @@ export function VoiceRecorder({
     if (isPaused) {
       mediaRecorderRef.current.resume()
 
-      timerRef.current = setInterval(() => {
-        setDuration((prev) => prev + 1)
-      }, 1000)
-
       setIsPaused(false)
+
+      startTimer()
 
       toast({
         title: "Recording resumed",
@@ -127,11 +133,9 @@ export function VoiceRecorder({
     } else {
       mediaRecorderRef.current.pause()
 
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-      }
-
       setIsPaused(true)
+
+      stopTimer()
 
       toast({
         title: "Recording paused",
@@ -147,6 +151,10 @@ export function VoiceRecorder({
     setAudioBlob(null)
     setAudioUrl(null)
     setDuration(0)
+    setIsPaused(false)
+    setIsRecording(false)
+
+    chunksRef.current = []
   }
 
   const uploadRecording = async () => {
@@ -157,19 +165,19 @@ export function VoiceRecorder({
     try {
       const fileName = `voice-story-${Date.now()}.webm`
 
+      // FORCE AUDIO MIME TYPE
       const audioFile = new File(
-  [audioBlob],
-  fileName,
-  {
-    type: "audio/webm",
-  }
-)
+        [audioBlob],
+        fileName,
+        {
+          type: "audio/webm",
+        }
+      )
 
-const uploadedBlob = await upload(fileName, audioFile, {
-  access: "public",
-  contentType: "audio/webm",
-  handleUploadUrl: "/api/upload-audio",
-})
+      const uploadedBlob = await upload(fileName, audioFile, {
+        access: "public",
+        handleUploadUrl: "/api/upload-audio",
+      })
 
       onAudioReady(uploadedBlob.url, duration)
 
@@ -178,7 +186,7 @@ const uploadedBlob = await upload(fileName, audioFile, {
         description: "Now add a title for your story",
       })
     } catch (error) {
-      console.error(error)
+      console.error("Upload error:", error)
 
       toast({
         title: "Upload failed",
@@ -203,7 +211,9 @@ const uploadedBlob = await upload(fileName, audioFile, {
         .padStart(2, "0")}`
     }
 
-    return `${mins}:${secs.toString().padStart(2, "0")}`
+    return `${mins}:${secs
+      .toString()
+      .padStart(2, "0")}`
   }
 
   return (
@@ -222,14 +232,16 @@ const uploadedBlob = await upload(fileName, audioFile, {
         </p>
       </div>
 
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-4 w-full">
         {!audioBlob ? (
           <>
-            <div className="relative flex gap-3">
+            <div className="relative">
               <Button
                 size="lg"
                 onClick={
-                  isRecording ? stopRecording : startRecording
+                  isRecording
+                    ? stopRecording
+                    : startRecording
                 }
                 className={`h-24 w-24 rounded-full ${
                   isRecording
@@ -244,19 +256,8 @@ const uploadedBlob = await upload(fileName, audioFile, {
                 )}
               </Button>
 
-              {isRecording && (
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  onClick={togglePauseRecording}
-                  className="h-24 w-24 rounded-full"
-                >
-                  {isPaused ? (
-                    <Play className="h-8 w-8" />
-                  ) : (
-                    <Pause className="h-8 w-8" />
-                  )}
-                </Button>
+              {isRecording && !isPaused && (
+                <div className="absolute -top-2 -right-2 h-4 w-4 bg-red-600 rounded-full animate-pulse" />
               )}
             </div>
 
@@ -265,11 +266,32 @@ const uploadedBlob = await upload(fileName, audioFile, {
             </div>
 
             {isRecording && (
-              <p className="text-sm text-muted-foreground animate-pulse">
-                {isPaused
-                  ? "Recording paused..."
-                  : "Recording in progress..."}
-              </p>
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-sm text-muted-foreground">
+                  {isPaused
+                    ? "Recording paused"
+                    : "Recording in progress..."}
+                </p>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={togglePauseRecording}
+                  className="gap-2"
+                >
+                  {isPaused ? (
+                    <>
+                      <Play className="h-4 w-4" />
+                      Resume Recording
+                    </>
+                  ) : (
+                    <>
+                      <Pause className="h-4 w-4" />
+                      Pause Recording
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
           </>
         ) : (
@@ -284,7 +306,7 @@ const uploadedBlob = await upload(fileName, audioFile, {
               Duration: {formatTime(duration)}
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-wrap justify-center gap-3">
               <Button
                 onClick={deleteRecording}
                 variant="outline"
