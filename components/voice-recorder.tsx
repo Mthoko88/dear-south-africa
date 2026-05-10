@@ -157,10 +157,19 @@ export function VoiceRecorder({
     try {
       const fileName = `voice-story-${Date.now()}.webm`
 
-      const uploadedBlob = await upload(fileName, audioBlob, {
-        access: "public",
-        handleUploadUrl: "/api/upload-audio",
-      })
+      const audioFile = new File(
+  [audioBlob],
+  fileName,
+  {
+    type: "audio/webm",
+  }
+)
+
+const uploadedBlob = await upload(fileName, audioFile, {
+  access: "public",
+  contentType: "audio/webm",
+  handleUploadUrl: "/api/upload-audio",
+})
 
       onAudioReady(uploadedBlob.url, duration)
 
