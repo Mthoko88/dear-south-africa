@@ -158,21 +158,72 @@ export function VoiceRecorder({
   }
 
   const uploadRecording = async () => {
-    if (!audioBlob) return
+  if (!audioBlob) return
 
-    setIsUploading(true)
+  setIsUploading(true)
 
-    try {
-      const fileName = `voice-story-${Date.now()}.webm`
+  try {
+    // Convert blob to proper audio file
+    const audioFile = new File(
+      [audioBlob],
+      `voice-story-${Date.now()}.webm`,
+      {
+        type: "audio/webm",
+      },
+    )
 
-      // FORCE AUDIO MIME TYPE
-      const audioFile = new File(
-        [audioBlob],
-        fileName,
-        {
-          type: "audio/webm",
-        }
-      )
+    const formData = new FormData()
+    formData.append("audio", audioFile)
+
+    // Add timeout protection
+    const controller = new AbortController()
+
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, 1000 * 60 * 10) // 10 minute timeout
+
+    const response = await fetch("/api/upload-audio", {
+      method: "POST",
+      body: formData,
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("Upload failed:", errorText)
+      throw new Error("Upload failed")
+    }
+
+    const data = await response.json()
+
+    console.log("Upload success:", data)
+
+    onAudioReady(data.url, duration)
+
+    toast({
+      title: "Recording uploaded",
+      description: "Your voice story is ready",
+    })
+  } catch (error: any) {
+    console.error("Upload error:", error)
+
+    let message = "Please try again"
+
+    if (error.name === "AbortError") {
+      message = "Upload timed out. File may be too large."
+    }
+
+    toast({
+      title: "Upload failed",
+      description: message,
+      variant: "destructive",
+    })
+  } finally {
+    setIsUploading(false)
+  }
+}
 
       const uploadedBlob = await upload(fileName, audioFile, {
         access: "public",
