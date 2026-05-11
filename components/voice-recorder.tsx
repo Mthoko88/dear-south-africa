@@ -34,7 +34,9 @@ export function VoiceRecorder({
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
 
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl)
@@ -88,7 +90,6 @@ export function VoiceRecorder({
         stream.getTracks().forEach((track) => track.stop())
       }
 
-      // Capture chunks every second
       mediaRecorder.start(1000)
 
       setIsRecording(true)
@@ -164,74 +165,78 @@ export function VoiceRecorder({
   }
 
   const uploadRecording = async () => {
-  if (!audioBlob) return
+    if (!audioBlob) return
 
-  setIsUploading(true)
+    setIsUploading(true)
 
-  try {
-    // Convert blob to proper audio file
-    const audioFile = new File(
-      [audioBlob],
-      `voice-story-${Date.now()}.webm`,
-      {
-        type: "audio/webm",
-      },
-    )
+    try {
+      const audioFile = new File(
+        [audioBlob],
+        `voice-story-${Date.now()}.webm`,
+        {
+          type: "audio/webm",
+        }
+      )
 
-    const formData = new FormData()
-    formData.append("audio", audioFile)
+      const formData = new FormData()
+      formData.append("audio", audioFile)
 
-    // Add timeout protection
-    const controller = new AbortController()
+      const controller = new AbortController()
 
-    const timeoutId = setTimeout(() => {
-      controller.abort()
-    }, 1000 * 60 * 10) // 10 minute timeout
+      const timeoutId = setTimeout(() => {
+        controller.abort()
+      }, 1000 * 60 * 10)
 
-    const response = await fetch("/api/upload-audio", {
-      method: "POST",
-      body: formData,
-      signal: controller.signal,
-    })
+      const response = await fetch("/api/upload-audio", {
+        method: "POST",
+        body: formData,
+        signal: controller.signal,
+      })
 
-    clearTimeout(timeoutId)
+      clearTimeout(timeoutId)
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("Upload failed:", errorText)
-      throw new Error("Upload failed")
+      if (!response.ok) {
+        const errorText = await response.text()
+
+        console.error("Upload failed:", errorText)
+
+        throw new Error(errorText || "Upload failed")
+      }
+
+      const data = await response.json()
+
+      console.log("Upload success:", data)
+
+      if (!data?.url) {
+        throw new Error("No URL returned from upload")
+      }
+
+      onAudioReady(data.url, duration)
+
+      toast({
+        title: "Recording uploaded",
+        description: "Your voice story is ready",
+      })
+    } catch (error: any) {
+      console.error("Upload error:", error)
+
+      let message = "Please try again"
+
+      if (error.name === "AbortError") {
+        message = "Upload timed out. File may be too large."
+      } else if (error.message) {
+        message = error.message
+      }
+
+      toast({
+        title: "Upload failed",
+        description: message,
+        variant: "destructive",
+      })
+    } finally {
+      setIsUploading(false)
     }
-
-    const data = await response.json()
-
-    console.log("Upload success:", data)
-
-    onAudioReady(data.url, duration)
-
-    toast({
-      title: "Recording uploaded",
-      description: "Your voice story is ready",
-    })
-  } catch (error: any) {
-    console.error("Upload error:", error)
-
-    let message = "Please try again"
-
-    if (error.name === "AbortError") {
-      message = "Upload timed out. File may be too large."
-    }
-
-    toast({
-      title: "Upload failed",
-      description: message,
-      variant: "destructive",
-    })
-  } finally {
-    setIsUploading(false)
   }
-}
-
-    
 
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600)
