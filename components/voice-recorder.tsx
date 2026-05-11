@@ -1,9 +1,15 @@
 "use client"
 
-import { upload } from "@vercel/blob/client"
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Mic, Square, Trash2, Upload, Pause, Play } from "lucide-react"
+import {
+  Mic,
+  Square,
+  Trash2,
+  Upload,
+  Pause,
+  Play,
+} from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
 interface VoiceRecorderProps {
@@ -225,29 +231,7 @@ export function VoiceRecorder({
   }
 }
 
-      const uploadedBlob = await upload(fileName, audioFile, {
-        access: "public",
-        handleUploadUrl: "/api/upload-audio",
-      })
-
-      onAudioReady(uploadedBlob.url, duration)
-
-      toast({
-        title: "Recording uploaded",
-        description: "Now add a title for your story",
-      })
-    } catch (error) {
-      console.error("Upload error:", error)
-
-      toast({
-        title: "Upload failed",
-        description: "Please try again",
-        variant: "destructive",
-      })
-    } finally {
-      setIsUploading(false)
-    }
-  }
+    
 
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600)
