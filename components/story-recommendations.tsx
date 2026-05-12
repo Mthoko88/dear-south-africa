@@ -13,24 +13,34 @@ interface RecommendedStory {
   id: string
   title: string
   content: string
-  author_id: string
+  user_id: string
   category: string
   content_warnings: string[]
   location: string
   upvotes: number
   view_count: number
   created_at: string
-  profiles: any
+
+  profiles?: {
+    username: string
+    full_name: string | null
+    avatar_url: string | null
+  }
+
   recommendation_reason: string
   similarity_score: number
 }
 
 export function StoryRecommendations() {
   const { user, profile } = useAuth()
+
   const [recommendations, setRecommendations] = useState<RecommendedStory[]>([])
   const [trending, setTrending] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<"recommended" | "trending" | "similar">("recommended")
+
+  const [activeTab, setActiveTab] = useState<
+    "recommended" | "trending" | "similar"
+  >("recommended")
 
   useEffect(() => {
     if (user) {
@@ -50,114 +60,223 @@ export function StoryRecommendations() {
         .eq("user_id", user.id)
         .limit(50)
 
-      const viewedStoryIds = viewHistory?.map((v) => v.story_id) || []
+      const viewedStoryIds =
+        viewHistory?.map((v) => v.story_id) || []
 
-      // Get stories with similar categories/challenges to user's profile
+      // Fetch stories
       let query = supabase
         .from("stories")
         .select(`
           *,
-          profiles:author_id (username, full_name, avatar_url)
+          profiles!stories_user_id_fkey(
+            username,
+            full_name,
+            avatar_url
+          )
         `)
-        .neq("author_id", user.id)
+        .neq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(20)
 
       if (viewedStoryIds.length > 0) {
-        query = query.not("id", "in", `(${viewedStoryIds.join(",")})`)
+        query = query.not(
+          "id",
+          "in",
+          `(${viewedStoryIds.join(",")})`
+        )
       }
 
-      const { data: stories } = await query
+      const { data: stories, error } = await query
+
+      if (error) {
+        console.error(
+          "Error fetching recommended stories:",
+          error
+        )
+        return
+      }
 
       if (stories) {
-        // Calculate recommendation scores
-        const scoredStories = stories.map((story) => {
+        // Score recommendations
+        const scoredStories = stories.map((story: any) => {
           let score = 0
+
           const reasons: string[] = []
 
           // Category match
-          if (profile.interests?.includes(story.category)) {
+          if (
+            profile.interests?.includes(story.category)
+          ) {
             score += 30
-            reasons.push(`Matches your interest in ${story.category}`)
+
+            reasons.push(
+              `Matches your interest in ${story.category}`
+            )
           }
 
           // Location proximity
-          if (profile.province === story.location?.includes(profile.province)) {
+          if (
+            profile.province &&
+            story.location?.includes(profile.province)
+          ) {
             score += 20
+
             reasons.push("From your province")
           }
 
           // Challenge similarity
-          const storyWords = (story.title + " " + story.content).toLowerCase()
-          const userChallenges = profile.challenges_faced || []
-          const matchingChallenges = userChallenges.filter((challenge) => storyWords.includes(challenge.toLowerCase()))
+          const storyWords = (
+            story.title +
+            " " +
+            (story.content || "")
+          ).toLowerCase()
+
+          const userChallenges =
+            profile.challenges_faced || []
+
+          const matchingChallenges =
+            userChallenges.filter((challenge: string) =>
+              storyWords.includes(
+                challenge.toLowerCase()
+              )
+            )
+
           if (matchingChallenges.length > 0) {
             score += matchingChallenges.length * 15
-            reasons.push(`Relates to your experiences with ${matchingChallenges[0]}`)
+
+            reasons.push(
+              `Relates to your experiences with ${matchingChallenges[0]}`
+            )
           }
 
           // Engagement score
-          const engagementScore = story.upvotes * 2 + story.view_count * 0.1
-          score += Math.min(engagementScore / 10, 20)
+          const engagementScore =
+            story.upvotes * 2 +
+            story.view_count * 0.1
+
+          score += Math.min(
+            engagementScore / 10,
+            20
+          )
 
           // Recency bonus
-          const daysOld = (Date.now() - new Date(story.created_at).getTime()) / (1000 * 60 * 60 * 24)
-          if (daysOld < 7) score += 10
+          const daysOld =
+            (Date.now() -
+              new Date(
+                story.created_at
+              ).getTime()) /
+            (1000 * 60 * 60 * 24)
+
+          if (daysOld < 7) {
+            score += 10
+          }
 
           return {
             ...story,
-            recommendation_reason: reasons[0] || "Popular in community",
+
+            profiles: story.profiles || {
+              username: "anonymous",
+              full_name: "Anonymous User",
+              avatar_url: null,
+            },
+
+            recommendation_reason:
+              reasons[0] ||
+              "Popular in community",
+
             similarity_score: score,
           }
         })
 
-        // Sort by score and take top recommendations
-        const topRecommendations = scoredStories.sort((a, b) => b.similarity_score - a.similarity_score).slice(0, 10)
+        // Sort by highest score
+        const topRecommendations =
+          scoredStories
+            .sort(
+              (a, b) =>
+                b.similarity_score -
+                a.similarity_score
+            )
+            .slice(0, 10)
 
         setRecommendations(topRecommendations)
       }
     } catch (error) {
-      console.error("Error fetching recommendations:", error)
+      console.error(
+        "Error fetching recommendations:",
+        error
+      )
     }
   }
 
   const fetchTrending = async () => {
     try {
-      // Get stories with high engagement in the last 7 days
       const sevenDaysAgo = new Date()
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-      const { data: stories } = await supabase
-        .from("stories")
-        .select(`
-          *,
-          profiles:author_id (username, full_name, avatar_url)
-        `)
-        .gte("created_at", sevenDaysAgo.toISOString())
-        .order("upvotes", { ascending: false })
-        .limit(10)
+      sevenDaysAgo.setDate(
+        sevenDaysAgo.getDate() - 7
+      )
+
+      const { data: stories, error } =
+        await supabase
+          .from("stories")
+          .select(`
+            *,
+            profiles!stories_user_id_fkey(
+              username,
+              full_name,
+              avatar_url
+            )
+          `)
+          .gte(
+            "created_at",
+            sevenDaysAgo.toISOString()
+          )
+          .order("upvotes", {
+            ascending: false,
+          })
+          .limit(10)
+
+      if (error) {
+        console.error(
+          "Error fetching trending stories:",
+          error
+        )
+
+        return
+      }
 
       if (stories) {
         setTrending(stories)
       }
     } catch (error) {
-      console.error("Error fetching trending stories:", error)
+      console.error(
+        "Error fetching trending stories:",
+        error
+      )
     }
 
     setLoading(false)
   }
 
-  const recordStoryView = async (storyId: string) => {
+  const recordStoryView = async (
+    storyId: string
+  ) => {
     if (!user) return
 
     try {
-      await supabase.from("story_views").upsert({
-        user_id: user.id,
-        story_id: storyId,
-        viewed_at: new Date().toISOString(),
-      })
+      await supabase
+        .from("story_views")
+        .upsert({
+          user_id: user.id,
+          story_id: storyId,
+          viewed_at:
+            new Date().toISOString(),
+        })
     } catch (error) {
-      console.error("Error recording story view:", error)
+      console.error(
+        "Error recording story view:",
+        error
+      )
     }
   }
 
@@ -171,46 +290,76 @@ export function StoryRecommendations() {
             <Sparkles className="h-5 w-5 mr-2" />
             Discover Stories
           </div>
+
           <Button
             variant="outline"
             size="sm"
             onClick={() => {
               setLoading(true)
+
               fetchRecommendations()
               fetchTrending()
             }}
             disabled={loading}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${
+                loading
+                  ? "animate-spin"
+                  : ""
+              }`}
+            />
+
             Refresh
           </Button>
         </CardTitle>
       </CardHeader>
+
       <CardContent>
-        {/* Tab Navigation */}
+        {/* Tabs */}
         <div className="flex space-x-1 mb-6 bg-muted p-1 rounded-lg">
           <Button
-            variant={activeTab === "recommended" ? "default" : "ghost"}
+            variant={
+              activeTab === "recommended"
+                ? "default"
+                : "ghost"
+            }
             size="sm"
-            onClick={() => setActiveTab("recommended")}
+            onClick={() =>
+              setActiveTab("recommended")
+            }
             className="flex-1"
           >
             <Heart className="h-4 w-4 mr-2" />
             For You
           </Button>
+
           <Button
-            variant={activeTab === "trending" ? "default" : "ghost"}
+            variant={
+              activeTab === "trending"
+                ? "default"
+                : "ghost"
+            }
             size="sm"
-            onClick={() => setActiveTab("trending")}
+            onClick={() =>
+              setActiveTab("trending")
+            }
             className="flex-1"
           >
             <TrendingUp className="h-4 w-4 mr-2" />
             Trending
           </Button>
+
           <Button
-            variant={activeTab === "similar" ? "default" : "ghost"}
+            variant={
+              activeTab === "similar"
+                ? "default"
+                : "ghost"
+            }
             size="sm"
-            onClick={() => setActiveTab("similar")}
+            onClick={() =>
+              setActiveTab("similar")
+            }
             className="flex-1"
           >
             <Users className="h-4 w-4 mr-2" />
@@ -222,69 +371,141 @@ export function StoryRecommendations() {
         {loading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="animate-pulse">
+              <div
+                key={i}
+                className="animate-pulse"
+              >
                 <div className="bg-gray-200 rounded-lg h-32"></div>
               </div>
             ))}
           </div>
         ) : (
           <div className="space-y-4">
-            {activeTab === "recommended" && (
+            {activeTab ===
+              "recommended" && (
               <>
-                {recommendations.length === 0 ? (
+                {recommendations.length ===
+                0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Sparkles className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Complete your profile to get personalized recommendations!</p>
+
+                    <p>
+                      Complete your
+                      profile to get
+                      personalized
+                      recommendations!
+                    </p>
                   </div>
                 ) : (
-                  recommendations.map((story) => (
-                    <div key={story.id} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Badge variant="secondary" className="text-xs">
-                          {story.recommendation_reason}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {Math.round(story.similarity_score)}% match
-                        </span>
+                  recommendations.map(
+                    (story) => (
+                      <div
+                        key={story.id}
+                        className="space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <Badge
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {
+                              story.recommendation_reason
+                            }
+                          </Badge>
+
+                          <span className="text-xs text-muted-foreground">
+                            {Math.round(
+                              story.similarity_score
+                            )}
+                            % match
+                          </span>
+                        </div>
+
+                        <div
+                          onClick={() =>
+                            recordStoryView(
+                              story.id
+                            )
+                          }
+                        >
+                          <StoryCard
+                            story={story}
+                          />
+                        </div>
                       </div>
-                      <div onClick={() => recordStoryView(story.id)}>
-                        <StoryCard story={story} />
-                      </div>
-                    </div>
-                  ))
+                    )
+                  )
                 )}
               </>
             )}
 
-            {activeTab === "trending" && (
+            {activeTab ===
+              "trending" && (
               <>
                 {trending.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No trending stories this week. Be the first to share!</p>
+
+                    <p>
+                      No trending stories
+                      this week. Be the
+                      first to share!
+                    </p>
                   </div>
                 ) : (
-                  trending.map((story, index) => (
-                    <div key={story.id} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Badge variant="default" className="text-xs">
-                          #{index + 1} Trending
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">{story.upvotes} upvotes this week</span>
+                  trending.map(
+                    (story, index) => (
+                      <div
+                        key={story.id}
+                        className="space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <Badge
+                            variant="default"
+                            className="text-xs"
+                          >
+                            #{index + 1}{" "}
+                            Trending
+                          </Badge>
+
+                          <span className="text-xs text-muted-foreground">
+                            {
+                              story.upvotes
+                            }{" "}
+                            upvotes this
+                            week
+                          </span>
+                        </div>
+
+                        <div
+                          onClick={() =>
+                            recordStoryView(
+                              story.id
+                            )
+                          }
+                        >
+                          <StoryCard
+                            story={story}
+                          />
+                        </div>
                       </div>
-                      <div onClick={() => recordStoryView(story.id)}>
-                        <StoryCard story={story} />
-                      </div>
-                    </div>
-                  ))
+                    )
+                  )
                 )}
               </>
             )}
 
-            {activeTab === "similar" && (
+            {activeTab ===
+              "similar" && (
               <div className="text-center py-8 text-muted-foreground">
                 <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Stories from people with similar experiences coming soon!</p>
+
+                <p>
+                  Stories from people
+                  with similar
+                  experiences coming
+                  soon!
+                </p>
               </div>
             )}
           </div>
