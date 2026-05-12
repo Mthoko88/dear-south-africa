@@ -15,12 +15,27 @@ import { ImageGallery } from "@/components/image-gallery"
 import Link from "next/link"
 
 
-async function getStory(id: string) {
+ async function getStory(id: string) {
   try {
-    // Fetch story
     const { data: story, error: storyError } = await supabase
       .from("stories")
-      .select("*")
+      .select(`
+        *,
+        
+        profiles!stories_user_id_fkey(
+          username,
+          full_name,
+          avatar_url
+        ),
+
+        organisations:organisation_id (
+          id,
+          trading_name,
+          logo_url,
+          organisation_type,
+          is_verified
+        )
+      `)
       .eq("id", id)
       .eq("is_published", true)
       .maybeSingle()
@@ -29,31 +44,11 @@ async function getStory(id: string) {
       return null
     }
 
-    // Fetch organisation if this is an org post
-    let organisation = null
-    if (story.organisation_id) {
-      const { data: orgData } = await supabase
-        .from("organisations")
-        .select("id, trading_name, logo_url, organisation_type, is_verified")
-        .eq("id", story.organisation_id)
-        .maybeSingle()
-
-      organisation = orgData
+    return {
+      story,
+      author: story.profiles || null,
+      organisation: story.organisations || null,
     }
-
-    // Fetch author profile (only if not an org post)
-    let author = null
-    if (!organisation && story.user_id && !story.is_anonymous) {
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", story.user_id)
-        .maybeSingle()
-
-      author = profileData
-    }
-
-    return { story, author, organisation }
   } catch (error) {
     console.error("Error fetching story:", error)
     return null
@@ -92,7 +87,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
     notFound()
   }
 
-  const { story, author, organisation } = result
+  const { story, author, organisation } = result as any
   const isVoiceStory = story.story_type === "voice"
 
   return (
