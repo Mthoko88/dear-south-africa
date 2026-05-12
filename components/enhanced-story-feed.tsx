@@ -27,10 +27,10 @@ interface Story {
   organisation_id?: string | null // Added organisation_id field
   source_url?: string | null // Added source_url for imported articles
   profiles?: {
-    username: string
-    full_name: string | null
-    avatar_url: string | null
-  }
+  username: string
+  full_name: string | null
+  avatar_url: string | null
+} | null
   organisations?: {
     id: string
     trading_name: string
@@ -50,72 +50,105 @@ export function EnhancedStoryFeed() {
     fetchStories()
   }, [])
 
-  async function fetchStories() {
-    setLoading(true)
-    setError(null)
+ async function fetchStories() {
+  setLoading(true)
+  setError(null)
 
-    try {
-      if (!supabase) {
-        throw new Error("Supabase client is not initialized")
-      }
+  try {
+    if (!supabase) {
+      throw new Error("Supabase client is not initialized")
+    }
 
-      const { data: storiesData, error: storiesError } = await supabase
+    const { data: storiesData, error: storiesError } =
+      await supabase
         .from("stories")
-        .select(
-          `id, title, content, user_id, category, content_warning, location, upvotes, downvotes, view_count, created_at, story_type, audio_url, is_anonymous, cover_image, organisation_id, source_url,
-          organisations:organisation_id (id, trading_name, logo_url, organisation_type, is_verified)`,
-        )
+        .select(`
+          id,
+          title,
+          content,
+          user_id,
+          category,
+          content_warning,
+          location,
+          upvotes,
+          downvotes,
+          view_count,
+          created_at,
+          story_type,
+          audio_url,
+          is_anonymous,
+          cover_image,
+          organisation_id,
+          source_url,
+
+          profiles!stories_user_id_fkey(
+            username,
+            full_name,
+            avatar_url
+          ),
+
+          organisations:organisation_id (
+            id,
+            trading_name,
+            logo_url,
+            organisation_type,
+            is_verified
+          )
+        `)
         .eq("is_published", true)
         .order("created_at", { ascending: false })
         .limit(30)
 
-      if (storiesError) {
-        console.error("Error fetching stories:", storiesError)
-        setError("Unable to load stories. Please check your connection and try again.")
-        setStories([])
-        return
-      }
+    if (storiesError) {
+      console.error(
+        "Error fetching stories:",
+        storiesError
+      )
 
-      if (!storiesData || storiesData.length === 0) {
-        setStories([])
-        return
-      }
+      setError(
+        "Unable to load stories. Please check your connection and try again.",
+      )
 
-      const userIds = [...new Set(storiesData.map((s) => s.user_id))]
+      setStories([])
+      return
+    }
 
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("user_id, username, full_name, avatar_url")
-        .in("user_id", userIds)
+    if (!storiesData || storiesData.length === 0) {
+      setStories([])
+      return
+    }
 
-      if (profilesError) {
-        console.error("Error fetching profiles:", profilesError)
-      }
-
-      const profileMap: Record<string, any> = {}
-      profiles?.forEach((profile) => {
-        profileMap[profile.user_id] = profile
-      })
-
-      const storiesWithProfiles = storiesData.map((story: any) => ({
+    const formattedStories = storiesData.map(
+      (story: any) => ({
         ...story,
-        profiles: profileMap[story.user_id] || {
+
+        profiles: story.profiles || {
           username: "anonymous",
           full_name: "Anonymous User",
           avatar_url: null,
         },
-        organisations: story.organisations || null,
-      }))
 
-      setStories(storiesWithProfiles)
-    } catch (error) {
-      console.error("Error fetching stories:", error)
-      setError("Unable to load stories. Please refresh the page and try again.")
-      setStories([])
-    } finally {
-      setLoading(false)
-    }
+        organisations:
+          story.organisations || null,
+      }),
+    )
+
+    setStories(formattedStories)
+  } catch (error) {
+    console.error(
+      "Error fetching stories:",
+      error,
+    )
+
+    setError(
+      "Unable to load stories. Please refresh the page and try again.",
+    )
+
+    setStories([])
+  } finally {
+    setLoading(false)
   }
+}
 
   const filteredStories = stories.filter(
     (story) =>
