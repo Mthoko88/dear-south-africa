@@ -60,44 +60,44 @@ export function EnhancedStoryFeed() {
     }
 
     const { data: storiesData, error: storiesError } =
-      await supabase
-        .from("stories")
-        .select(`
-          id,
-          title,
-          content,
-          user_id,
-          category,
-          content_warning,
-          location,
-          upvotes,
-          downvotes,
-          view_count,
-          created_at,
-          story_type,
-          audio_url,
-          is_anonymous,
-          cover_image,
-          organisation_id,
-          source_url,
+  await supabase
+    .from("stories")
+    .select(`
+      id,
+      title,
+      content,
+      user_id,
+      category,
+      content_warning,
+      location,
+      upvotes,
+      downvotes,
+      view_count,
+      created_at,
+      story_type,
+      audio_url,
+      is_anonymous,
+      cover_image,
+      organisation_id,
+      source_url,
 
-          profiles (
-            username,
-            full_name,
-            avatar_url
-          ),
+      profiles!stories_user_id_fkey (
+        username,
+        full_name,
+        avatar_url
+      ),
 
-          organisations (
-            id,
-            trading_name,
-            logo_url,
-            organisation_type,
-            is_verified
-          )
-        `)
-        .eq("is_published", true)
-        .order("created_at", { ascending: false })
-        .limit(30)
+      organisations (
+        id,
+        trading_name,
+        logo_url,
+        organisation_type,
+        is_verified
+      )
+    `)
+    .eq("is_published", true)
+    .order("created_at", { ascending: false })
+    .limit(30)
 
     if (storiesError) {
       console.error(
