@@ -25,9 +25,9 @@ interface Profile {
 interface Story {
   id: string
   title: string
-  content: string
-  category: string
-  content_warning: string | null
+  content?: string
+  category?: string
+  content_warning?: string | null
   location: string | null
   upvotes: number
   downvotes?: number
