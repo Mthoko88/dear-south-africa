@@ -38,6 +38,12 @@ interface Story {
   story_type?: string
   audio_url?: string | null
   cover_image?: string | null
+
+  profiles?: {
+    username: string
+    full_name: string | null
+    avatar_url: string | null
+  }
 }
 
 async function getProfile(username: string) {
@@ -87,7 +93,13 @@ async function getUserStories(userId: string): Promise<Story[]> {
         user_id,
         story_type,
         audio_url,
-        cover_image
+        cover_image,
+
+        profiles!stories_user_id_fkey(
+          username,
+          full_name,
+          avatar_url
+        )
       `)
       .eq("user_id", userId)
       .eq("is_published", true)
