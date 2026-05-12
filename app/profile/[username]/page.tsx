@@ -27,7 +27,7 @@ interface Story {
   title: string
   content?: string
   category?: string
-  content_warning?: string | null
+  content_warning: string | null
   location: string | null
   upvotes: number
   downvotes?: number
