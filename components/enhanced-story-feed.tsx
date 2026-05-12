@@ -59,58 +59,35 @@ export function EnhancedStoryFeed() {
       throw new Error("Supabase client is not initialized")
     }
 
+    // FETCH STORIES
     const { data: storiesData, error: storiesError } =
-  await supabase
-    .from("stories")
-    .select(`
-      id,
-      title,
-      content,
-      user_id,
-      category,
-      content_warning,
-      location,
-      upvotes,
-      downvotes,
-      view_count,
-      created_at,
-      story_type,
-      audio_url,
-      is_anonymous,
-      cover_image,
-      organisation_id,
-      source_url,
-
-      profiles!stories_user_id_fkey (
-        username,
-        full_name,
-        avatar_url
-      ),
-
-      organisations (
-        id,
-        trading_name,
-        logo_url,
-        organisation_type,
-        is_verified
-      )
-    `)
-    .eq("is_published", true)
-    .order("created_at", { ascending: false })
-    .limit(30)
+      await supabase
+        .from("stories")
+        .select(`
+          id,
+          title,
+          content,
+          user_id,
+          category,
+          content_warning,
+          location,
+          upvotes,
+          downvotes,
+          view_count,
+          created_at,
+          story_type,
+          audio_url,
+          is_anonymous,
+          cover_image,
+          organisation_id,
+          source_url
+        `)
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(30)
 
     if (storiesError) {
-      console.error(
-        "Error fetching stories:",
-        storiesError
-      )
-
-      setError(
-        "Unable to load stories. Please check your connection and try again.",
-      )
-
-      setStories([])
-      return
+      throw storiesError
     }
 
     if (!storiesData || storiesData.length === 0) {
@@ -118,18 +95,44 @@ export function EnhancedStoryFeed() {
       return
     }
 
+    // GET USER IDS
+    const userIds = [
+      ...new Set(
+        storiesData
+          .map((story) => story.user_id)
+          .filter(Boolean)
+      ),
+    ]
+
+    // FETCH PROFILES SEPARATELY
+    const { data: profilesData } = await supabase
+      .from("profiles")
+      .select(`
+        id,
+        username,
+        full_name,
+        avatar_url
+      `)
+      .in("id", userIds)
+
+    // CREATE PROFILE MAP
+    const profileMap = new Map()
+
+    profilesData?.forEach((profile) => {
+      profileMap.set(profile.id, profile)
+    })
+
+    // MERGE STORIES + PROFILES
     const formattedStories = storiesData.map(
-      (story: any) => ({
+      (story) => ({
         ...story,
 
-        profiles: story.profiles || {
-          username: "anonymous",
-          full_name: "Anonymous User",
-          avatar_url: null,
-        },
-
-        organisations:
-          story.organisations || null,
+        profiles:
+          profileMap.get(story.user_id) || {
+            username: "anonymous",
+            full_name: "Anonymous User",
+            avatar_url: null,
+          },
       }),
     )
 
