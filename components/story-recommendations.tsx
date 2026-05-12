@@ -68,7 +68,7 @@ export function StoryRecommendations() {
         .from("stories")
         .select(`
           *,
-          profiles!stories_user_id_fkey(
+          profiles (
             username,
             full_name,
             avatar_url
