@@ -30,7 +30,7 @@ interface Story {
   content_warning: string | null
   location: string | null
   upvotes: number
-  downvotes: number
+  downvotes?: number
   view_count: number
   is_anonymous: boolean
   created_at: string
@@ -39,11 +39,23 @@ interface Story {
   audio_url?: string | null
   cover_image?: string | null
 
+  media_urls?: string[] | null
+  organisation_id?: string | null
+  source_url?: string | null
+
   profiles?: {
     username: string
-    full_name: string | null
-    avatar_url: string | null
+    full_name?: string
+    avatar_url?: string
   }
+
+  organisations?: {
+    id: string
+    trading_name: string
+    logo_url?: string | null
+    organisation_type: string
+    is_verified: boolean
+  } | null
 }
 
 async function getProfile(username: string) {
@@ -94,11 +106,22 @@ async function getUserStories(userId: string): Promise<Story[]> {
         story_type,
         audio_url,
         cover_image,
+        media_urls,
+        organisation_id,
+        source_url,
 
         profiles!stories_user_id_fkey(
           username,
           full_name,
           avatar_url
+        ),
+
+        organisations:organisation_id (
+          id,
+          trading_name,
+          logo_url,
+          organisation_type,
+          is_verified
         )
       `)
       .eq("user_id", userId)
