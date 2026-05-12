@@ -274,30 +274,9 @@ export default async function ProfilePage({ params }: { params: { username: stri
                 ) : (
                   <div className="space-y-4">
                     {publicStories.map((story) => (
-                      <StoryCard
+                     <StoryCard
                         key={story.id}
-                        story={{
-                          id: story.id,
-                          title: story.title,
-                          content: story.content,
-                          category: story.category,
-                          content_warning: story.content_warning,
-                          location: story.location,
-                          upvotes: story.upvotes,
-                          downvotes: story.downvotes,
-                          view_count: story.view_count,
-                          is_anonymous: false,
-                          created_at: story.created_at,
-                          user_id: story.user_id,
-                          story_type: story.story_type,
-                          audio_url: story.audio_url,
-                          cover_image: story.cover_image,
-                          profiles: {
-                            username: profile.username,
-                            full_name: profile.full_name,
-                            avatar_url: profile.avatar_url,
-                          },
-                        }}
+                        story={story}
                       />
                     ))}
                   </div>
