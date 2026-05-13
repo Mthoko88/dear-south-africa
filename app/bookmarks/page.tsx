@@ -84,39 +84,29 @@ export default function BookmarksPage() {
       if (storiesError) throw storiesError
 
       // Fetch author profiles
-      const authorIds = [...new Set(stories.map((s) => s.user_id))] // Changed author_id to user_id
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, username, full_name, avatar_url")
-        .in("id", authorIds)
+const authorIds = [...new Set(stories.map((s) => s.user_id))]
 
-      if (profilesError) throw profilesError
-      const profilesMap = new Map(profiles?.map((p) => [p.id, p]) || [])
+const { data: profiles, error: profilesError } = await supabase
+  .from("profiles")
+  .select("user_id, username, full_name, avatar_url")
+  .in("user_id", authorIds)
 
-      // Merge everything
-      const storiesMap = new Map(stories.map((s) => [s.id, { ...s, author: profilesMap.get(s.user_id) }])) // Changed author_id to user_id
+if (profilesError) throw profilesError
 
-      const merged: BookmarkData[] = rawBookmarks
-        .map((b) => {
-          const story = storiesMap.get(b.story_id)
-          return story
-            ? {
-                id: b.id,
-                story_id: b.story_id,
-                created_at: b.created_at,
-                story,
-              }
-            : null // ignore bookmarks whose stories were deleted
-        })
-        .filter(Boolean) as BookmarkData[]
+const profilesMap = new Map(
+  profiles?.map((p) => [p.user_id, p]) || []
+)
 
-      setBookmarks(merged)
-    } catch (error) {
-      console.error("Error fetching bookmarks:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
+// Merge everything
+const storiesMap = new Map(
+  stories.map((s) => [
+    s.id,
+    {
+      ...s,
+      author: profilesMap.get(s.user_id),
+    },
+  ]),
+)
 
   const removeBookmark = async (bookmarkId: string) => {
     try {
