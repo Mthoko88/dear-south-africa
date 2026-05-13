@@ -91,7 +91,12 @@ profilesData?.forEach((profile) => {
   profilesMap.set(profile.id, profile)
 })
         // Calculate recommendation scores
-        const scoredStories = stories.map((story) => {
+        const storiesWithProfiles = stories.map((story) => ({
+          ...story,
+          profiles: profilesMap.get(story.user_id) || null,
+        }))
+        
+        const scoredStories = storiesWithProfiles.map((story) => {
           let score = 0
           const reasons: string[] = []
 
@@ -178,7 +183,12 @@ const profilesMap = new Map()
 profilesData?.forEach((profile) => {
   profilesMap.set(profile.id, profile)
 })
-        setTrending(stories)
+        const storiesWithProfiles = stories.map((story) => ({
+          ...story,
+          profiles: profilesMap.get(story.user_id) || null,
+        }))
+        
+        setTrending(storiesWithProfiles)
       }
     } catch (error) {
       console.error("Error fetching trending stories:", error)
