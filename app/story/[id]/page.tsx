@@ -20,22 +20,8 @@ import Link from "next/link"
     const { data: story, error: storyError } = await supabase
       .from("stories")
       .select(`
-        *,
-        
-        profiles(
-          username,
-          full_name,
-          avatar_url
-        ),
-
-        organisations:organisation_id (
-          id,
-          trading_name,
-          logo_url,
-          organisation_type,
-          is_verified
-        )
-      `)
+           *
+         `))
       .eq("id", id)
       .eq("is_published", true)
       .maybeSingle()
@@ -44,11 +30,46 @@ import Link from "next/link"
       return null
     }
 
-    return {
-      story,
-      author: story.profiles || null,
-      organisation: story.organisations || null,
-    }
+    let author = null
+
+if (story.user_id) {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select(`
+      id,
+      username,
+      full_name,
+      avatar_url
+    `)
+    .eq("id", story.user_id)
+    .maybeSingle()
+
+  author = profile
+}
+
+let organisation = null
+
+if (story.organisation_id) {
+  const { data: org } = await supabase
+    .from("organisations")
+    .select(`
+      id,
+      trading_name,
+      logo_url,
+      organisation_type,
+      is_verified
+    `)
+    .eq("id", story.organisation_id)
+    .maybeSingle()
+
+  organisation = org
+}
+   
+   return {
+  story,
+  author,
+  organisation,
+}
   } catch (error) {
     console.error("Error fetching story:", error)
     return null
