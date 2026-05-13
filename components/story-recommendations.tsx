@@ -107,7 +107,7 @@ profilesData?.forEach((profile) => {
           }
 
           // Location proximity
-          if (profile.province === story.location?.includes(profile.province)) {
+          if (story.location?.includes(profile.province)) {
             score += 20
             reasons.push("From your province")
           }
