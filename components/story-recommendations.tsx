@@ -55,10 +55,7 @@ export function StoryRecommendations() {
       // Get stories with similar categories/challenges to user's profile
       let query = supabase
         .from("stories")
-        .select(`
-          *,
-          profiles:author_id (username, full_name, avatar_url)
-        `)
+        .select("*")
         .neq("author_id", user.id)
         .order("created_at", { ascending: false })
         .limit(20)
@@ -70,6 +67,29 @@ export function StoryRecommendations() {
       const { data: stories } = await query
 
       if (stories) {
+        const userIds = [
+  ...new Set(
+    stories
+      .map((story: any) => story.user_id)
+      .filter(Boolean)
+  ),
+]
+
+const { data: profilesData } = await supabase
+  .from("profiles")
+  .select(`
+    id,
+    username,
+    full_name,
+    avatar_url
+  `)
+  .in("id", userIds)
+
+const profilesMap = new Map()
+
+profilesData?.forEach((profile) => {
+  profilesMap.set(profile.id, profile)
+})
         // Calculate recommendation scores
         const scoredStories = stories.map((story) => {
           let score = 0
@@ -129,15 +149,35 @@ export function StoryRecommendations() {
 
       const { data: stories } = await supabase
         .from("stories")
-        .select(`
-          *,
-          profiles:author_id (username, full_name, avatar_url)
-        `)
+        .select("*")
         .gte("created_at", sevenDaysAgo.toISOString())
         .order("upvotes", { ascending: false })
         .limit(10)
 
       if (stories) {
+        const userIds = [
+  ...new Set(
+    stories
+      .map((story: any) => story.user_id)
+      .filter(Boolean)
+  ),
+]
+
+const { data: profilesData } = await supabase
+  .from("profiles")
+  .select(`
+    id,
+    username,
+    full_name,
+    avatar_url
+  `)
+  .in("id", userIds)
+
+const profilesMap = new Map()
+
+profilesData?.forEach((profile) => {
+  profilesMap.set(profile.id, profile)
+})
         setTrending(stories)
       }
     } catch (error) {
