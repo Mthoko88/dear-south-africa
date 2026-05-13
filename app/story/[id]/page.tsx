@@ -21,7 +21,7 @@ import Link from "next/link"
       .from("stories")
       .select(`
            *
-         `))
+         `)
       .eq("id", id)
       .eq("is_published", true)
       .maybeSingle()
