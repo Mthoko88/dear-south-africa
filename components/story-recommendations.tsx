@@ -83,7 +83,7 @@ const { data: profilesData } = await supabase
     full_name,
     avatar_url
   `)
-  .in("id", userIds)
+  .in("user_id", userIds)
 
 const profilesMap = new Map()
 
@@ -176,7 +176,7 @@ const { data: profilesData } = await supabase
     full_name,
     avatar_url
   `)
-  .in("id", userIds)
+  .in("user_id", userIds)
 
 const profilesMap = new Map()
 
