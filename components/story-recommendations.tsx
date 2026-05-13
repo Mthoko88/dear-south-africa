@@ -263,6 +263,11 @@ const fetchTrending = async () => {
         .from("stories")
         .select(`
             *,
+            profiles (
+                username,
+                full_name,
+                avatar_url
+              )
             organisations (
               id,
               trading_name,
