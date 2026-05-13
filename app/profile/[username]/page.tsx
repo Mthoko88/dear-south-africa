@@ -110,7 +110,7 @@ async function getUserStories(userId: string): Promise<Story[]> {
         organisation_id,
         source_url,
 
-        profiles!stories_user_id_fkey(
+        profiles(
           username,
           full_name,
           avatar_url
