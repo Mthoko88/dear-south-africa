@@ -22,6 +22,7 @@ import Link from "next/link"
       .select(`
            *,
            profiles(
+             id,
              username,
              full_name,
              avatar_url
