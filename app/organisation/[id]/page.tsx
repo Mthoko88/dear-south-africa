@@ -342,17 +342,25 @@ export default function OrganisationProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {stories.map((story) => (
                   <StoryCard
                     key={story.id}
                     id={story.id}
                     title={story.title}
-                    excerpt={story.content.substring(0, 150) + "..."}
+                    excerpt={(story.content || "").substring(0, 150) + "..."}
                     category={story.category}
-                    author={story.is_anonymous ? "Anonymous" : (story.profiles?.username || "Unknown")}
-                    authorAvatar={story.is_anonymous ? null : story.profiles?.avatar_url}
-                    coverImage={story.cover_image_url}
+                    author={
+                      story.is_anonymous
+                        ? "Anonymous"
+                        : story.profiles?.username || "Unknown"
+                    }
+                    authorAvatar={
+                      story.is_anonymous
+                        ? null
+                        : story.profiles?.avatar_url
+                    }
+                    coverImage={story.cover_image}
                     date={new Date(story.created_at).toLocaleDateString()}
                     upvotes={story.upvotes}
                     downvotes={story.downvotes}
