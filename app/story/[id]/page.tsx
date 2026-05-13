@@ -20,7 +20,19 @@ import Link from "next/link"
     const { data: story, error: storyError } = await supabase
       .from("stories")
       .select(`
-           *
+           *,
+           profiles(
+             username,
+             full_name,
+             avatar_url
+           ),
+            organisations (
+             id,
+             trading_name,
+             logo_url,
+             organisation_type,
+             is_verified
+           )
          `)
       .eq("id", id)
       .eq("is_published", true)
