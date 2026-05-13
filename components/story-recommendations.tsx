@@ -56,7 +56,7 @@ export function StoryRecommendations() {
       let query = supabase
         .from("stories")
         .select("*")
-        .neq("author_id", user.id)
+        .neq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(20)
 
