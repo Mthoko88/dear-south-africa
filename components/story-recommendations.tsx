@@ -43,7 +43,7 @@ export function StoryRecommendations() {
   const { user, profile } = useAuth()
 
   const [recommendations, setRecommendations] = useState<RecommendedStory[]>([])
-  const [trending, setTrending] = useState<any[]>([])
+  const [trending, setTrending] = useState<RecommendedStory[]>([])
   const [loading, setLoading] = useState(true)
 
   const [activeTab, setActiveTab] = useState<
@@ -209,11 +209,12 @@ export function StoryRecommendations() {
           return {
             ...story,
 
-            profiles: profilesMap.get(story.user_id) || {
-              username: "anonymous",
-              full_name: "Anonymous User",
-              avatar_url: null,
-            },
+           profiles:
+              profilesMap.get(story.user_id) ?? {
+                username: "anonymous",
+                full_name: "Anonymous User",
+                avatar_url: null,
+              },
 
             recommendation_reason:
               reasons[0] ||
@@ -321,7 +322,7 @@ const fetchTrending = async () => {
         ...story,
 
         profiles:
-          profilesMap.get(story.user_id) || {
+          profilesMap.get(story.user_id) ?? {
             username: "anonymous",
             full_name: "Anonymous User",
             avatar_url: null,
