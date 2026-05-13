@@ -675,6 +675,7 @@ cover_image: coverImageUrl || (mediaImages.length > 0 ? mediaImages[0] : null),
       />
 
       <Dialog open={isOpen && !showTypeSelector && !showLinkImport} onOpenChange={handleModalChange}>
+        <DialogTitle>Create Story</DialogTitle>
         <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <div className="flex border-b">
             <button
