@@ -38,7 +38,6 @@ interface Story {
   story_type?: string
   audio_url?: string | null
   cover_image?: string | null
-
   media_urls?: string[] | null
   organisation_id?: string | null
   source_url?: string | null
@@ -48,14 +47,6 @@ interface Story {
     full_name?: string
     avatar_url?: string
   }
-
-  organisations?: {
-    id: string
-    trading_name: string
-    logo_url?: string | null
-    organisation_type: string
-    is_verified: boolean
-  } | null
 }
 
 async function getProfile(username: string) {
@@ -64,18 +55,15 @@ async function getProfile(username: string) {
   }
 
   try {
-    // maybeSingle() avoids the "multiple (or no) rows returned" runtime error
-    const { data, error } = await supabase.from("profiles").select("*").eq("username", username).limit(1).maybeSingle()
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("username", username)
+      .limit(1)
+      .maybeSingle()
 
-    // If PostgREST still flags an error, treat the "no rows / many rows" case
-    // as a graceful miss instead of a hard failure.
     if (error) {
-      // Codes that indicate 0 or >1 rows -- see PostgREST error table.
-      // PGRST116: no rows,  PGRST118: multiple rows (older),  PGRST125: ambiguous
-      const benignCodes = ["PGRST116", "PGRST118", "PGRST125"]
-      if (!benignCodes.includes(error.code ?? "")) {
-        console.error("Error fetching profile:", error)
-      }
+      console.error("Error fetching profile:", error)
       return null
     }
 
@@ -108,58 +96,52 @@ async function getUserStories(userId: string): Promise<Story[]> {
         cover_image,
         media_urls,
         organisation_id,
-        source_url,
-
-     
+        source_url
       `)
       .eq("user_id", userId)
       .eq("is_published", true)
       .order("created_at", { ascending: false })
 
     if (error) {
-      const userIds = [
-  ...new Set(
-    (data || [])
-      .map((story) => story.user_id)
-      .filter(Boolean)
-  ),
-]
-
-const { data: profilesData } = await supabase
-  .from("profiles")
-  .select(`
-    id,
-    username,
-    full_name,
-    avatar_url
-  `)
-  .in("id", userIds)
-
-const profilesMap = new Map()
-
-profilesData?.forEach((profile) => {
-  profilesMap.set(profile.id, profile)
-})
       console.error("Error fetching user stories:", error)
       return []
     }
 
-    const storiesWithProfiles = (data || []).map(
-  (story) => ({
-    ...story,
+    const userIds = [
+      ...new Set(
+        (data || [])
+          .map((story) => story.user_id)
+          .filter(Boolean)
+      ),
+    ]
 
-    profiles:
-      profilesMap.get(story.user_id) || {
-        username: "anonymous",
-        full_name: "Anonymous User",
-        avatar_url: null,
-      },
-  })
-)
+    const { data: profilesData } = await supabase
+      .from("profiles")
+      .select(`
+        user_id,
+        username,
+        full_name,
+        avatar_url
+      `)
+      .in("user_id", userIds)
 
-return storiesWithProfiles
+    const profilesMap = new Map()
 
-    return data || []
+    profilesData?.forEach((profile) => {
+      profilesMap.set(profile.user_id, profile)
+    })
+
+    const storiesWithProfiles = (data || []).map((story) => ({
+      ...story,
+      profiles:
+        profilesMap.get(story.user_id) || {
+          username: "anonymous",
+          full_name: "Anonymous User",
+          avatar_url: null,
+        },
+    }))
+
+    return storiesWithProfiles
   } catch (error) {
     console.error("Error fetching user stories:", error)
     return []
@@ -178,10 +160,13 @@ function formatDate(dateString: string) {
   }
 }
 
-export default async function ProfilePage({ params }: { params: { username: string } }) {
+export default async function ProfilePage({
+  params,
+}: {
+  params: { username: string }
+}) {
   const { username } = params
 
-  // If someone lands here with /profile/edit, bounce them to the real edit route.
   if (username === "edit") {
     redirect("/profile/edit")
   }
@@ -197,7 +182,10 @@ export default async function ProfilePage({ params }: { params: { username: stri
   }
 
   const stories = await getUserStories(profile.user_id)
-  const publicStories = stories.filter((story) => !story.is_anonymous)
+
+  const publicStories = stories.filter(
+    (story) => !story.is_anonymous
+  )
 
   return (
     <>
@@ -217,14 +205,23 @@ export default async function ProfilePage({ params }: { params: { username: stri
             <Card>
               <CardHeader className="text-center">
                 <Avatar className="w-24 h-24 mx-auto mb-4">
-                  <AvatarImage src={profile.avatar_url || "/placeholder.svg"} />
+                  <AvatarImage
+                    src={profile.avatar_url || "/placeholder.svg"}
+                  />
                   <AvatarFallback className="text-2xl">
                     {profile.username?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
-                <CardTitle className="text-xl">{profile.full_name || profile.username}</CardTitle>
-                <p className="text-muted-foreground">@{profile.username}</p>
+
+                <CardTitle className="text-xl">
+                  {profile.full_name || profile.username}
+                </CardTitle>
+
+                <p className="text-muted-foreground">
+                  @{profile.username}
+                </p>
               </CardHeader>
+
               <CardContent className="space-y-4">
                 {profile.bio && (
                   <div>
@@ -239,9 +236,11 @@ export default async function ProfilePage({ params }: { params: { username: stri
                       <span>{profile.location}</span>
                     </div>
                   )}
+
                   {profile.website && (
                     <div className="flex items-center gap-2">
                       <Globe className="w-4 h-4" />
+
                       <a
                         href={profile.website}
                         target="_blank"
@@ -252,9 +251,13 @@ export default async function ProfilePage({ params }: { params: { username: stri
                       </a>
                     </div>
                   )}
+
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    <span>Joined {formatDate(profile.created_at)}</span>
+
+                    <span>
+                      Joined {formatDate(profile.created_at)}
+                    </span>
                   </div>
                 </div>
 
@@ -271,12 +274,23 @@ export default async function ProfilePage({ params }: { params: { username: stri
 
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
-                    <div className="font-semibold">{publicStories.length}</div>
-                    <div className="text-xs text-muted-foreground">Stories</div>
+                    <div className="font-semibold">
+                      {publicStories.length}
+                    </div>
+
+                    <div className="text-xs text-muted-foreground">
+                      Stories
+                    </div>
                   </div>
+
                   <div>
-                    <div className="font-semibold">{publicStories.length}</div>
-                    <div className="text-xs text-muted-foreground">Published</div>
+                    <div className="font-semibold">
+                      {publicStories.length}
+                    </div>
+
+                    <div className="text-xs text-muted-foreground">
+                      Published
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -287,11 +301,18 @@ export default async function ProfilePage({ params }: { params: { username: stri
           <div className="md:col-span-2">
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-bold mb-4">Stories by {profile.full_name || profile.username}</h2>
+                <h2 className="text-2xl font-bold mb-4">
+                  Stories by{" "}
+                  {profile.full_name || profile.username}
+                </h2>
+
                 {publicStories.length === 0 ? (
                   <Card>
                     <CardContent className="text-center py-8">
-                      <p className="text-muted-foreground">No public stories yet.</p>
+                      <p className="text-muted-foreground">
+                        No public stories yet.
+                      </p>
+
                       <p className="text-sm text-muted-foreground mt-2">
                         Stories shared anonymously won't appear here.
                       </p>
@@ -300,7 +321,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
                 ) : (
                   <div className="space-y-4">
                     {publicStories.map((story) => (
-                     <StoryCard
+                      <StoryCard
                         key={story.id}
                         story={story}
                       />
