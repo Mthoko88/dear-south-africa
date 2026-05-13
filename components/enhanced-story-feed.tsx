@@ -113,7 +113,7 @@ export function EnhancedStoryFeed() {
         full_name,
         avatar_url
       `)
-      .in("id", userIds)
+      .in("user_id", userIds)
 
     // CREATE PROFILE MAP
     const profileMap = new Map()
