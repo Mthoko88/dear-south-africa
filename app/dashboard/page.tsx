@@ -111,7 +111,7 @@ export default function DashboardPage() {
       const { data: commentsData, error: commentsError } = await supabase
         .from("comments")
         .select("id, content, created_at, story_id")
-        .eq("author_id", user.id)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(10)
 
