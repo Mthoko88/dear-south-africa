@@ -22,7 +22,7 @@ import Link from "next/link"
       .select(`
         *,
         
-        profiles!stories_user_id_fkey(
+        profiles(
           username,
           full_name,
           avatar_url
