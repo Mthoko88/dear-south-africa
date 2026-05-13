@@ -110,28 +110,54 @@ async function getUserStories(userId: string): Promise<Story[]> {
         organisation_id,
         source_url,
 
-        profiles(
-          username,
-          full_name,
-          avatar_url
-        ),
-
-        organisations:organisation_id (
-          id,
-          trading_name,
-          logo_url,
-          organisation_type,
-          is_verified
-        )
+     
       `)
       .eq("user_id", userId)
       .eq("is_published", true)
       .order("created_at", { ascending: false })
 
     if (error) {
+      const userIds = [
+  ...new Set(
+    (data || [])
+      .map((story) => story.user_id)
+      .filter(Boolean)
+  ),
+]
+
+const { data: profilesData } = await supabase
+  .from("profiles")
+  .select(`
+    id,
+    username,
+    full_name,
+    avatar_url
+  `)
+  .in("id", userIds)
+
+const profilesMap = new Map()
+
+profilesData?.forEach((profile) => {
+  profilesMap.set(profile.id, profile)
+})
       console.error("Error fetching user stories:", error)
       return []
     }
+
+    const storiesWithProfiles = (data || []).map(
+  (story) => ({
+    ...story,
+
+    profiles:
+      profilesMap.get(story.user_id) || {
+        username: "anonymous",
+        full_name: "Anonymous User",
+        avatar_url: null,
+      },
+  })
+)
+
+return storiesWithProfiles
 
     return data || []
   } catch (error) {
