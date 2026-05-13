@@ -21,7 +21,6 @@ import {
   Instagram, 
   Twitter, 
   Linkedin,
-  Users,
   CheckCircle,
   ExternalLink,
   Loader2
