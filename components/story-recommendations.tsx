@@ -75,19 +75,7 @@ export function StoryRecommendations() {
       let query = supabase
         .from("stories")
         .select(`
-            *,
-            profiles (
-                username,
-                full_name,
-                avatar_url
-              )
-            organisations (
-              id,
-              trading_name,
-              logo_url,
-              organisation_type,
-              is_verified
-            )
+            *
           `)
         .neq("user_id", user.id)
         .order("created_at", { ascending: false })
@@ -124,10 +112,13 @@ export function StoryRecommendations() {
           const { data: profilesData } = await supabase
             .from("profiles")
             .select(`
+               organisations (
               id,
-              username,
-              full_name,
-              avatar_url
+              trading_name,
+              logo_url,
+              organisation_type,
+              is_verified
+            )
             `)
             .in("id", userIds)
           
@@ -263,11 +254,6 @@ const fetchTrending = async () => {
         .from("stories")
         .select(`
             *,
-            profiles (
-                username,
-                full_name,
-                avatar_url
-              )
             organisations (
               id,
               trading_name,
