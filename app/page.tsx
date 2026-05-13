@@ -39,7 +39,7 @@ export default function HomePage() {
       <div className="flex justify-center">
         <Sidebar />
 
-        <main className="flex-1 p-4 md:p-6 space-y-6 max-w-5xl">
+        <main className="flex-1 p-4 md:p-6 space-y-6 max-w-7xl">
         {/* Welcome Section */}
           <div className="text-center space-y-4 py-4">
            
