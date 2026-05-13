@@ -45,17 +45,18 @@ interface StoryCardProps {
     organisation_id?: string | null
     source_url?: string | null
     profiles?: {
-      username: string
-      full_name?: string
-      avatar_url?: string
-    }
-    organisations?: {
-      id: string
-      trading_name: string
-      logo_url?: string | null
-      organisation_type: string
-      is_verified: boolean
-    } | null
+    username?: string
+    full_name?: string | null
+    avatar_url?: string | null
+  }
+
+  organisations?: {
+    id: string
+    trading_name: string
+    logo_url?: string | null
+    organisation_type: string
+    is_verified: boolean
+  } | null
   }
 }
 
