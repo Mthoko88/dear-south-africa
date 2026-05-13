@@ -22,10 +22,18 @@ interface RecommendedStory {
   created_at: string
 
   profiles?: {
-    username: string
-    full_name: string | null
-    avatar_url: string | null
+    username?: string
+    full_name?: string | null
+    avatar_url?: string | null
   }
+
+  organisations?: {
+    id: string
+    trading_name: string
+    logo_url?: string | null
+    organisation_type: string
+    is_verified: boolean
+  } | null
 
   recommendation_reason: string
   similarity_score: number
