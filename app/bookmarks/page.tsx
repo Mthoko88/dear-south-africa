@@ -10,7 +10,7 @@ import { BookmarkIcon, BookmarkX, Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Header } from "@/components/header"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useRouter } from "next/navigation"
+
 
 interface Story {
   id: string
@@ -41,7 +41,6 @@ interface BookmarkData {
 
 export default function BookmarksPage() {
   const { user } = useAuth()
-  const router = useRouter()
   const [bookmarks, setBookmarks] = useState<BookmarkData[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
