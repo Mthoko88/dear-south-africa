@@ -66,14 +66,7 @@ export function StoryRecommendations() {
       // Fetch stories
       let query = supabase
         .from("stories")
-        .select(`
-          *,
-          profiles (
-            username,
-            full_name,
-            avatar_url
-          )
-        `)
+        .select("*")
         .neq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(20)
@@ -97,6 +90,31 @@ export function StoryRecommendations() {
       }
 
       if (stories) {
+        
+                  const userIds = [
+            ...new Set(
+              stories
+                .map((story: any) => story.user_id)
+                .filter(Boolean)
+            ),
+          ]
+          
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select(`
+              id,
+              username,
+              full_name,
+              avatar_url
+            `)
+            .in("id", userIds)
+          
+          const profilesMap = new Map()
+          
+          profilesData?.forEach((profile) => {
+            profilesMap.set(profile.id, profile)
+          })
+        
         // Score recommendations
         const scoredStories = stories.map((story: any) => {
           let score = 0
@@ -174,7 +192,7 @@ export function StoryRecommendations() {
           return {
             ...story,
 
-            profiles: story.profiles || {
+            profiles: profilesMap.get(story.user_id) || {
               username: "anonymous",
               full_name: "Anonymous User",
               avatar_url: null,
