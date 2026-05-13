@@ -109,7 +109,7 @@ export function StoryRecommendations() {
             `)
             .in("id", userIds)
           
-          const profilesMap = new Map()
+          const profilesMap = new Map<string, any>()
           
           profilesData?.forEach((profile) => {
             profilesMap.set(profile.id, profile)
@@ -226,77 +226,92 @@ export function StoryRecommendations() {
     }
   }
 
-  const fetchTrending = async () => {
-    try {
-      const sevenDaysAgo = new Date()
+const fetchTrending = async () => {
+  try {
+    const sevenDaysAgo = new Date()
 
-      sevenDaysAgo.setDate(
-        sevenDaysAgo.getDate() - 7
-      )
+    sevenDaysAgo.setDate(
+      sevenDaysAgo.getDate() - 7
+    )
 
-      const { data: stories, error } =
-        await supabase
-          .from("stories")
-          .select(`
-            *,
-            profiles!stories_user_id_fkey(
-              username,
-              full_name,
-              avatar_url
-            )
-          `)
-          .gte(
-            "created_at",
-            sevenDaysAgo.toISOString()
-          )
-          .order("upvotes", {
-            ascending: false,
-          })
-          .limit(10)
-
-      if (error) {
-        console.error(
-          "Error fetching trending stories:",
-          error
+    // FETCH STORIES
+    const { data: storiesData, error } =
+      await supabase
+        .from("stories")
+        .select("*")
+        .gte(
+          "created_at",
+          sevenDaysAgo.toISOString()
         )
+        .order("upvotes", {
+          ascending: false,
+        })
+        .limit(10)
 
-        return
-      }
-
-      if (stories) {
-        setTrending(stories)
-      }
-    } catch (error) {
+    if (error) {
       console.error(
         "Error fetching trending stories:",
         error
       )
+
+      return
     }
 
+    if (!storiesData || storiesData.length === 0) {
+      setTrending([])
+      return
+    }
+
+    // GET USER IDS
+    const userIds = [
+      ...new Set(
+        storiesData
+          .map((story) => story.user_id)
+          .filter(Boolean)
+      ),
+    ]
+
+    // FETCH PROFILES SEPARATELY
+    const { data: profilesData } = await supabase
+      .from("profiles")
+      .select(`
+        id,
+        username,
+        full_name,
+        avatar_url
+      `)
+      .in("id", userIds)
+
+    // CREATE MAP
+   const profilesMap = new Map<string, any>()
+
+    profilesData?.forEach((profile) => {
+      profilesMap.set(profile.id, profile)
+    })
+
+    // COMBINE STORIES + PROFILES
+    const storiesWithProfiles =
+      storiesData.map((story) => ({
+        ...story,
+
+        profiles:
+          profilesMap.get(story.user_id) || {
+            username: "anonymous",
+            full_name: "Anonymous User",
+            avatar_url: null,
+          },
+      }))
+
+    setTrending(storiesWithProfiles)
+  } catch (error) {
+    console.error(
+      "Error fetching trending stories:",
+      error
+    )
+  } finally {
     setLoading(false)
   }
-
-  const recordStoryView = async (
-    storyId: string
-  ) => {
-    if (!user) return
-
-    try {
-      await supabase
-        .from("story_views")
-        .upsert({
-          user_id: user.id,
-          story_id: storyId,
-          viewed_at:
-            new Date().toISOString(),
-        })
-    } catch (error) {
-      console.error(
-        "Error recording story view:",
-        error
-      )
-    }
-  }
+}
 
   if (!user) return null
 
