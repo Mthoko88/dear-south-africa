@@ -74,7 +74,16 @@ export function StoryRecommendations() {
       // Fetch stories
       let query = supabase
         .from("stories")
-        .select("*")
+        .select(`
+            *,
+            organisations (
+              id,
+              trading_name,
+              logo_url,
+              organisation_type,
+              is_verified
+            )
+          `)
         .neq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(20)
@@ -246,7 +255,16 @@ const fetchTrending = async () => {
     const { data: storiesData, error } =
       await supabase
         .from("stories")
-        .select("*")
+        .select(`
+            *,
+            organisations (
+              id,
+              trading_name,
+              logo_url,
+              organisation_type,
+              is_verified
+            )
+          `)
         .gte(
           "created_at",
           sevenDaysAgo.toISOString()
