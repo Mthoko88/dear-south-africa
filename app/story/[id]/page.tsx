@@ -27,87 +27,69 @@ import Link from "next/link"
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
-async function getStory(id: string) {
+async function fetchStories() {
   try {
-    const supabase = await createClient()
+    setLoading(true)
+    setError(null)
 
-    const { data: story, error } = await supabase
+    // STEP 1: Get stories only
+    const { data: storiesData, error: storiesError } = await supabase
       .from("stories")
-      .select(`
-        id,
-        title,
-        content,
-        category,
-        user_id,
-        created_at,
-        view_count,
-        is_anonymous,
-        location,
-        content_warning,
-        content_type,
-        story_type,
-        audio_url,
-        cover_image,
-        media_urls,
-        organisation_id,
-        is_published
-      `)
-      .eq("id", id)
+      .select("*")
       .eq("is_published", true)
-      .single()
+      .order("created_at", { ascending: false })
+      .limit(30)
 
-    console.log("STORY:", story)
-    console.log("ERROR:", error)
-
-    if (error || !story) {
-      return null
+    if (storiesError) {
+      console.error("Stories fetch error:", storiesError)
+      setError(storiesError.message)
+      setStories([])
+      return
     }
 
-    let author = null
-
-    if (story.user_id) {
-      const { data } = await supabase
-        .from("profiles")
-        .select(`
-          user_id,
-          username,
-          full_name,
-          avatar_url
-        `)
-        .eq("user_id", story.user_id)
-        .single()
-
-      author = data
+    if (!storiesData || storiesData.length === 0) {
+      setStories([])
+      return
     }
 
-    let organisation = null
+    // STEP 2: Fetch profiles separately
+    const userIds = [
+      ...new Set(
+        storiesData
+          .map((story) => story.user_id)
+          .filter(Boolean)
+      ),
+    ]
 
-    if (story.organisation_id) {
-      const { data } = await supabase
-        .from("organisations")
-        .select(`
-          id,
-          trading_name,
-          logo_url,
-          organisation_type,
-          is_verified
-        `)
-        .eq("id", story.organisation_id)
-        .single()
+    const { data: profilesData } = await supabase
+      .from("profiles")
+      .select("user_id, username, full_name, avatar_url")
+      .in("user_id", userIds)
 
-      organisation = data
-    }
+    // STEP 3: Create lookup map
+    const profilesMap = new Map()
 
-    return {
-      story,
-      author,
-      organisation,
-    }
-  } catch (error) {
-    console.error("GET STORY ERROR:", error)
-    return null
+    profilesData?.forEach((profile) => {
+      profilesMap.set(profile.user_id, profile)
+    })
+
+    // STEP 4: Merge profiles into stories
+    const mergedStories = storiesData.map((story) => ({
+      ...story,
+      profiles: profilesMap.get(story.user_id) || null,
+    }))
+
+    setStories(mergedStories)
+    console.log("Stories loaded:", mergedStories)
+  } catch (err: any) {
+    console.error("Unexpected fetch error:", err)
+    setError("Failed to load stories")
+    setStories([])
+  } finally {
+    setLoading(false)
   }
 }
+
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
