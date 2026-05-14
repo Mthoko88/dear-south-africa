@@ -81,14 +81,14 @@ export function EnhancedStoryFeed() {
           organisation_id,
           source_url,
 
-          profiles:user_id (
+          profiles (
             user_id,
             username,
             full_name,
             avatar_url
           ),
 
-          organisations:organisation_id (
+          organisations (
             id,
             trading_name,
             logo_url,
