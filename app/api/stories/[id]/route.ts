@@ -1,18 +1,24 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase"
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const body = await request.json()
-    const storyId = params.id
+    const { id: storyId } = await params
 
-    // Get the authenticated user from the authorization header
+    const body = await request.json()
+
     const authHeader = request.headers.get("authorization")
+
     if (!authHeader) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
     }
 
-    // Update the story
     const { data, error } = await supabase
       .from("stories")
       .update({
@@ -31,12 +37,20 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     if (error) {
       console.error("Error updating story:", error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({ data })
   } catch (error: any) {
-    console.error("Error in PATCH /api/stories/[id]:", error)
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 })
+    console.error("PATCH story error:", error)
+
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
+    )
   }
 }
