@@ -530,7 +530,10 @@ export function StoryCard({ story }: StoryCardProps) {
 
   return (
     <>
-      <div role="link" tabIndex={0} onClick={goToStory} onKeyDown={(e) => e.key === "Enter" && router.push(`/story/${story.id}`)}>
+      <Link
+  href={`/story/${story.id}`}
+  className="block"
+>
         <Card className="hover:shadow-md transition-shadow duration-200 cursor-pointer mb-5">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-3">
@@ -861,7 +864,7 @@ export function StoryCard({ story }: StoryCardProps) {
               </svg>
               <span className="text-sm">Copy Link</span>
             </Button>
-          </div>
+          </Link>
         </DialogContent>
       </Dialog>
     </>
