@@ -15,6 +15,7 @@ import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 interface Author {
@@ -22,7 +23,6 @@ interface Author {
   full_name?: string
   avatar_url?: string
 }
-
 
 interface StoryCardProps {
   story: {
@@ -195,7 +195,7 @@ export function StoryCard({ story }: StoryCardProps) {
   const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null)
   const [loading, setLoading] = useState(false)
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false) // Added share dialog state
- 
+  const router = useRouter()
 
   useEffect(() => {
     if (user) {
@@ -501,6 +501,22 @@ export function StoryCard({ story }: StoryCardProps) {
     return plainText.slice(0, maxLength) + "..."
   }
 
+  const goToStory = (e: React.MouseEvent) => {
+    // Prevent navigation if clicking on interactive elements
+    const target = e.target as HTMLElement
+    if (
+      target.closest("button") ||
+      target.closest("a") ||
+      target.closest("audio") ||
+      target.closest('[role="button"]')
+    ) {
+      return
+    }
+    
+    // Navigate to story
+    router.push(`/story/${story.id}`)
+  }
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -513,10 +529,7 @@ export function StoryCard({ story }: StoryCardProps) {
 
   return (
     <>
-      <Link
-  href={`/story/${story.id}`}
-  className="block"
->
+      <div role="link" tabIndex={0} onClick={goToStory} onKeyDown={(e) => e.key === "Enter" && router.push(`/story/${story.id}`)}>
         <Card className="hover:shadow-md transition-shadow duration-200 cursor-pointer mb-5">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-3">
@@ -847,7 +860,7 @@ export function StoryCard({ story }: StoryCardProps) {
               </svg>
               <span className="text-sm">Copy Link</span>
             </Button>
-          </Link>
+          </div>
         </DialogContent>
       </Dialog>
     </>
