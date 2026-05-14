@@ -139,6 +139,7 @@ export default function OrganisationProfilePage() {
           source_url,
 
           profiles:user_id (
+            user_id,
             username,
             full_name,
             avatar_url
