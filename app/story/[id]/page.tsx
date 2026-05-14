@@ -97,9 +97,11 @@ function getCategoryColor(category: string) {
 export default async function StoryPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const result = await getStory(params.id)
+  const { id } = await params
+
+  const result = await getStory(id)
 
   if (!result) notFound()
 
@@ -120,7 +122,6 @@ export default async function StoryPage({
 
         <div className="space-y-6">
 
-          {/* MEDIA */}
           {(story.cover_image || story.media_urls?.length > 0) && (
             <ImageGallery
               images={story.media_urls || []}
@@ -128,7 +129,6 @@ export default async function StoryPage({
             />
           )}
 
-          {/* HEADER */}
           <Card>
             <CardHeader>
               <div className="flex flex-wrap gap-2 mb-4">
@@ -147,7 +147,6 @@ export default async function StoryPage({
                 {story.title}
               </CardTitle>
 
-              {/* AUTHOR */}
               <div className="flex items-center justify-between pt-4">
                 <div className="flex items-center space-x-3">
 
@@ -166,10 +165,12 @@ export default async function StoryPage({
                           className="font-medium hover:underline flex items-center gap-1"
                         >
                           {organisation.trading_name}
+
                           {organisation.is_verified && (
                             <CheckCircle className="h-4 w-4 text-primary" />
                           )}
                         </Link>
+
                         <p className="text-sm text-muted-foreground">
                           {organisation.organisation_type}
                         </p>
@@ -180,6 +181,7 @@ export default async function StoryPage({
                       <Avatar className="h-10 w-10">
                         <AvatarFallback>A</AvatarFallback>
                       </Avatar>
+
                       <div>
                         <p className="font-medium">Anonymous</p>
                       </div>
@@ -188,6 +190,7 @@ export default async function StoryPage({
                     <>
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={author.avatar_url || ""} />
+
                         <AvatarFallback>
                           {author.username?.charAt(0).toUpperCase()}
                         </AvatarFallback>
@@ -200,6 +203,7 @@ export default async function StoryPage({
                         >
                           {author.full_name || author.username}
                         </Link>
+
                         <p className="text-sm text-muted-foreground">
                           @{author.username}
                         </p>
@@ -216,7 +220,6 @@ export default async function StoryPage({
                 </div>
               </div>
 
-              {/* META */}
               <div className="flex gap-4 text-sm text-muted-foreground pt-2">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
@@ -233,7 +236,6 @@ export default async function StoryPage({
             </CardHeader>
           </Card>
 
-          {/* CONTENT */}
           <Card>
             <CardContent className="pt-6">
               <StoryContentGate
