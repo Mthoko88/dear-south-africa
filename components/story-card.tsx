@@ -190,11 +190,11 @@ export function StoryCard({ story }: StoryCardProps) {
   const safeCategory = story.category || "other"
   const isVoiceStory = story.story_type === "voice"
 
-  // useEffect(() => {
-  //   if (user) {
-  //     checkUserReactions()
-  //   }
-  // }, [user, story.id])
+  useEffect(() => {
+    if (user) {
+      checkUserReactions()
+    }
+  }, [user, story.id])
 
   const checkUserReactions = async () => {
     try {
