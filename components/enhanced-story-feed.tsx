@@ -63,7 +63,7 @@ export function EnhancedStoryFeed() {
     const { data: storiesData, error: storiesError } =
       await supabase
         .from("stories")
-        .select(`
+       .select(`
           id,
           title,
           content,
@@ -79,6 +79,7 @@ export function EnhancedStoryFeed() {
           audio_url,
           is_anonymous,
           cover_image,
+          media_urls,
           organisation_id,
           source_url
         `)
