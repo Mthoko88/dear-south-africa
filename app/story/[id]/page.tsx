@@ -1,49 +1,68 @@
 import { notFound } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+
 import { Header } from "@/components/header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { Calendar, MapPin, Eye, Building2, CheckCircle } from "lucide-react"
+
+import {
+  Calendar,
+  MapPin,
+  Eye,
+  Building2,
+  CheckCircle,
+} from "lucide-react"
+
 import { StoryReactions } from "@/components/story-reactions"
 import { CommentSection } from "@/components/comment-section"
 import { ViewTracker } from "@/components/view-tracker"
 import { BackButton } from "@/components/back-button"
 import { StoryContentGate } from "@/components/story-content-gate"
 import { ImageGallery } from "@/components/image-gallery"
+
 import Link from "next/link"
 
 async function getStory(id: string) {
   try {
-   const { data: story, error } = await supabase
-  .from("stories")
-  .select(`
-    id,
-    title,
-    content,
-    category,
-    user_id,
-    created_at,
-    view_count,
-    is_anonymous,
-    location,
-    content_warning,
-    content_type,
-    story_type,
-    audio_url,
-    cover_image,
-    media_urls,
-    organisation_id,
-    is_published
-  `)
-  .eq("id", id)
-  .maybeSingle()
+    const { data: story, error } = await supabase
+      .from("stories")
+      .select(`
+        id,
+        title,
+        content,
+        category,
+        user_id,
+        created_at,
+        view_count,
+        is_anonymous,
+        location,
+        content_warning,
+        content_type,
+        story_type,
+        audio_url,
+        cover_image,
+        media_urls,
+        organisation_id,
+        is_published
+      `)
+      .eq("id", id)
+      .eq("is_published", true)
+      .maybeSingle()
 
-    if (error || !story) return null
+    if (error) {
+      console.error("Supabase error:", error)
+      return null
+    }
 
-    // AUTHOR (FIXED: user_id, NOT id)
+    if (!story) {
+      return null
+    }
+
+    // AUTHOR
     let author = null
+
     if (story.user_id) {
       const { data } = await supabase
         .from("profiles")
@@ -56,17 +75,28 @@ async function getStory(id: string) {
 
     // ORGANISATION
     let organisation = null
+
     if (story.organisation_id) {
       const { data } = await supabase
         .from("organisations")
-        .select("id, trading_name, logo_url, organisation_type, is_verified")
+        .select(`
+          id,
+          trading_name,
+          logo_url,
+          organisation_type,
+          is_verified
+        `)
         .eq("id", story.organisation_id)
         .maybeSingle()
 
       organisation = data
     }
 
-    return { story, author, organisation }
+    return {
+      story,
+      author,
+      organisation,
+    }
   } catch (error) {
     console.error("Error fetching story:", error)
     return null
@@ -90,7 +120,9 @@ function getCategoryColor(category: string) {
     family: "bg-purple-100 text-purple-800",
     education: "bg-yellow-100 text-yellow-800",
     "mental-health": "bg-teal-100 text-teal-800",
+    "postnatal-depression": "bg-orange-100 text-orange-800",
   }
+
   return colors[category] || "bg-gray-100 text-gray-800"
 }
 
@@ -99,11 +131,14 @@ export default async function StoryPage({
 }: {
   params: Promise<{ id: string }>
 }) {
+  // IMPORTANT FOR NEXT.JS 15+
   const { id } = await params
 
   const result = await getStory(id)
 
-  if (!result) notFound()
+  if (!result) {
+    notFound()
+  }
 
   const { story, author, organisation } = result
 
@@ -122,7 +157,8 @@ export default async function StoryPage({
 
         <div className="space-y-6">
 
-          {(story.cover_image || story.media_urls?.length > 0) && (
+          {(story.cover_image ||
+            (story.media_urls && story.media_urls.length > 0)) && (
             <ImageGallery
               images={story.media_urls || []}
               coverImage={story.cover_image}
@@ -131,6 +167,7 @@ export default async function StoryPage({
 
           <Card>
             <CardHeader>
+
               <div className="flex flex-wrap gap-2 mb-4">
                 <Badge className={getCategoryColor(story.category)}>
                   {story.category.replace(/-/g, " ")}
@@ -233,6 +270,7 @@ export default async function StoryPage({
                   </div>
                 )}
               </div>
+
             </CardHeader>
           </Card>
 
@@ -252,6 +290,7 @@ export default async function StoryPage({
           <Separator />
 
           <CommentSection storyId={story.id} />
+
         </div>
       </div>
     </div>
