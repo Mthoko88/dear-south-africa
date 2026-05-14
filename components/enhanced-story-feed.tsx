@@ -106,21 +106,21 @@ export function EnhancedStoryFeed() {
 
     // FETCH PROFILES SEPARATELY
     const { data: profilesData } = await supabase
-      .from("profiles")
-      .select(`
-        id,
-        username,
-        full_name,
-        avatar_url
-      `)
-      .in("user_id", userIds)
+  .from("profiles")
+  .select(`
+    user_id,
+    username,
+    full_name,
+    avatar_url
+  `)
+  .in("user_id", userIds)
 
-    // CREATE PROFILE MAP
-    const profileMap = new Map()
+// CREATE PROFILE MAP
+const profileMap = new Map()
 
-    profilesData?.forEach((profile) => {
-      profileMap.set(profile.id, profile)
-    })
+profilesData?.forEach((profile) => {
+  profileMap.set(profile.user_id, profile)
+})
 
     // MERGE STORIES + PROFILES
     const formattedStories = storiesData.map(
