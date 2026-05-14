@@ -15,7 +15,6 @@ import { useAuth } from "@/lib/auth-context"
 import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 interface Author {
@@ -196,7 +195,7 @@ export function StoryCard({ story }: StoryCardProps) {
   const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null)
   const [loading, setLoading] = useState(false)
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false) // Added share dialog state
-  const router = useRouter()
+ 
 
   useEffect(() => {
     if (user) {
@@ -500,22 +499,6 @@ export function StoryCard({ story }: StoryCardProps) {
     // Truncate the plain text
     if (plainText.length <= maxLength) return plainText
     return plainText.slice(0, maxLength) + "..."
-  }
-
-  const goToStory = (e: React.MouseEvent) => {
-    // Prevent navigation if clicking on interactive elements
-    const target = e.target as HTMLElement
-    if (
-      target.closest("button") ||
-      target.closest("a") ||
-      target.closest("audio") ||
-      target.closest('[role="button"]')
-    ) {
-      return
-    }
-    
-    // Navigate to story
-    router.push(`/story/${story.id}`)
   }
 
   const formatDuration = (seconds: number) => {
