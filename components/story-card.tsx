@@ -190,11 +190,11 @@ export function StoryCard({ story }: StoryCardProps) {
   const safeCategory = story.category || "other"
   const isVoiceStory = story.story_type === "voice"
 
-  useEffect(() => {
-    if (user) {
-      checkUserReactions()
-    }
-  }, [user, story.id])
+  // useEffect(() => {
+  //   if (user) {
+  //     checkUserReactions()
+  //   }
+  // }, [user, story.id])
 
   const checkUserReactions = async () => {
     try {
@@ -450,11 +450,10 @@ export function StoryCard({ story }: StoryCardProps) {
   }
 
   const stripHtmlTags = (html: string) => {
-    const temp = document.createElement("div")
-    temp.innerHTML = html
+  if (!html) return ""
 
-    return temp.textContent || temp.innerText || ""
-  }
+  return html.replace(/<[^>]*>/g, "")
+}
 
   const getPreviewContent = (content: string) => {
     const plain = stripHtmlTags(content)
