@@ -815,4 +815,4 @@ export function StoryCard({ story }: StoryCardProps) {
     </>
   )
 }
-```
+
