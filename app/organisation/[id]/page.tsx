@@ -118,7 +118,40 @@ export default function OrganisationProfilePage() {
         // Fetch organisation
         const { data: org, error: orgError } = await supabase
           .from("organisations")
-          .select("*")
+          .select(`
+          id,
+          title,
+          content,
+          user_id,
+          category,
+          content_warning,
+          location,
+          upvotes,
+          downvotes,
+          view_count,
+          created_at,
+          story_type,
+          audio_url,
+          is_anonymous,
+          cover_image,
+          media_urls,
+          organisation_id,
+          source_url,
+
+          profiles:user_id (
+            username,
+            full_name,
+            avatar_url
+          ),
+
+          organisations:organisation_id (
+            id,
+            trading_name,
+            logo_url,
+            organisation_type,
+            is_verified
+          )
+        `)
           .eq("id", params.id)
           .single()
 
