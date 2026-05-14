@@ -11,26 +11,30 @@ import { Loader2, RefreshCw, Search } from "lucide-react"
 interface Story {
   id: string
   title: string
-  content: string | null // Allow null for voice stories
+  content: string | null
   user_id: string
   category: string
-  content_warning: string | null // Added content_warning
+  content_warning: string | null
   location: string | null
   upvotes: number
-  downvotes: number // Added downvotes
+  downvotes: number
   view_count: number
   created_at: string
-  story_type?: string // Added story_type field
-  audio_url?: string | null // Added audio_url field
-  is_anonymous?: boolean // Added is_anonymous field
-  cover_image?: string | null // Added cover_image field
-  organisation_id?: string | null // Added organisation_id field
-  source_url?: string | null // Added source_url for imported articles
+  story_type?: string
+  audio_url?: string | null
+  is_anonymous?: boolean
+  cover_image?: string | null
+  media_urls?: string[] | null
+  organisation_id?: string | null
+  source_url?: string | null
+
   profiles?: {
-  username: string
-  full_name: string | null
-  avatar_url: string | null
-} | null
+    user_id: string
+    username: string
+    full_name: string | null
+    avatar_url: string | null
+  } | null
+
   organisations?: {
     id: string
     trading_name: string
@@ -50,91 +54,75 @@ export function EnhancedStoryFeed() {
     fetchStories()
   }, [])
 
- async function fetchStories() {
-  setLoading(true)
-  setError(null)
+  async function fetchStories() {
+    setLoading(true)
+    setError(null)
 
-  try {
-    if (!supabase) {
-      throw new Error("Supabase client is not initialized")
-    }
+    try {
+      const { data, error } = await supabase
+        .from("stories")
+        .select(`
+          id,
+          title,
+          content,
+          user_id,
+          category,
+          content_warning,
+          location,
+          upvotes,
+          downvotes,
+          view_count,
+          created_at,
+          story_type,
+          audio_url,
+          is_anonymous,
+          cover_image,
+          media_urls,
+          organisation_id,
+          source_url,
 
-    // FETCH STORIES
-        const { data: storiesData, error: storiesError } =
-          await supabase
-            .from("stories")
-            .select(`
-              id,
-              title,
-              content,
-              user_id,
-              category,
-              content_warning,
-              location,
-              upvotes,
-              downvotes,
-              view_count,
-              created_at,
-              story_type,
-              audio_url,
-              is_anonymous,
-              cover_image,
-              media_urls,
-              organisation_id,
-              source_url,
-        
-              profiles:user_id (
-                user_id,
-                username,
-                full_name,
-                avatar_url
-              ),
-        
-              organisations:organisation_id (
-                id,
-                trading_name,
-                logo_url,
-                organisation_type,
-                is_verified
-              )
-            `)
-            .eq("is_published", true)
-            .order("created_at", { ascending: false })
-            .limit(30)
+          profiles:user_id (
+            user_id,
+            username,
+            full_name,
+            avatar_url
+          ),
 
-    if (storiesError) {
-      throw storiesError
-    }
+          organisations:organisation_id (
+            id,
+            trading_name,
+            logo_url,
+            organisation_type,
+            is_verified
+          )
+        `)
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(30)
 
-    if (!storiesData || storiesData.length === 0) {
+      if (error) {
+        throw error
+      }
+
+      setStories(data || [])
+    } catch (err) {
+      console.error("Error fetching stories:", err)
+
+      setError(
+        "Unable to load stories. Please refresh the page and try again."
+      )
+
       setStories([])
-      return
+    } finally {
+      setLoading(false)
     }
-
-    setStories(storiesData || [])
-
-    setStories(formattedStories)
-  } catch (error) {
-    console.error(
-      "Error fetching stories:",
-      error,
-    )
-
-    setError(
-      "Unable to load stories. Please refresh the page and try again.",
-    )
-
-    setStories([])
-  } finally {
-    setLoading(false)
   }
-}
 
   const filteredStories = stories.filter(
     (story) =>
       searchQuery === "" ||
       story.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (story.content && story.content.toLowerCase().includes(searchQuery.toLowerCase())),
+      story.content?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   if (loading) {
@@ -150,6 +138,7 @@ export function EnhancedStoryFeed() {
       <Card>
         <CardContent className="py-12 text-center space-y-4">
           <p className="text-destructive">{error}</p>
+
           <Button onClick={fetchStories} variant="outline">
             <RefreshCw className="mr-2 h-4 w-4" />
             Try Again
@@ -161,20 +150,37 @@ export function EnhancedStoryFeed() {
 
   return (
     <div className="space-y-6">
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Community Stories</h2>
-          <p className="text-muted-foreground">Discover and connect through shared experiences</p>
+          <h2 className="text-2xl font-bold">
+            Community Stories
+          </h2>
+
+          <p className="text-muted-foreground">
+            Discover and connect through shared experiences
+          </p>
         </div>
 
-        <Button variant="outline" size="sm" onClick={fetchStories} disabled={loading}>
-          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchStories}
+          disabled={loading}
+        >
+          <RefreshCw
+            className={`mr-2 h-4 w-4 ${
+              loading ? "animate-spin" : ""
+            }`}
+          />
+
           Refresh
         </Button>
       </div>
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+
         <Input
           placeholder="Search stories..."
           value={searchQuery}
@@ -186,13 +192,18 @@ export function EnhancedStoryFeed() {
       {filteredStories.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">No stories found</p>
+            <p className="text-muted-foreground">
+              No stories found
+            </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           {filteredStories.map((story) => (
-            <StoryCard key={story.id} story={story} />
+            <StoryCard
+              key={story.id}
+              story={story}
+            />
           ))}
         </div>
       )}
