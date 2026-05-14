@@ -29,7 +29,6 @@ interface Story {
   source_url?: string | null
 
   profiles?: {
-    user_id: string
     username: string
     full_name: string | null
     avatar_url: string | null
@@ -55,10 +54,10 @@ export function EnhancedStoryFeed() {
   }, [])
 
   async function fetchStories() {
-    setLoading(true)
-    setError(null)
-
     try {
+      setLoading(true)
+      setError(null)
+
       const { data, error } = await supabase
         .from("stories")
         .select(`
@@ -81,14 +80,13 @@ export function EnhancedStoryFeed() {
           organisation_id,
           source_url,
 
-          profiles (
-            user_id,
+          profiles:user_id (
             username,
             full_name,
             avatar_url
           ),
 
-          organisations (
+          organisations:organisation_id (
             id,
             trading_name,
             logo_url,
@@ -101,29 +99,30 @@ export function EnhancedStoryFeed() {
         .limit(30)
 
       if (error) {
-        throw error
+        console.error("Error fetching stories:", error)
+        setError(error.message)
+        setStories([])
+        return
       }
 
       setStories(data || [])
-    } catch (err) {
-      console.error("Error fetching stories:", err)
-
-      setError(
-        "Unable to load stories. Please refresh the page and try again."
-      )
-
+    } catch (err: any) {
+      console.error("Unexpected error:", err)
+      setError("Failed to load stories")
       setStories([])
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredStories = stories.filter(
-    (story) =>
-      searchQuery === "" ||
+  const filteredStories = stories.filter((story) => {
+    if (!searchQuery) return true
+
+    return (
       story.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       story.content?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+    )
+  })
 
   if (loading) {
     return (
@@ -150,7 +149,6 @@ export function EnhancedStoryFeed() {
 
   return (
     <div className="space-y-6">
-
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold">
@@ -166,14 +164,8 @@ export function EnhancedStoryFeed() {
           variant="outline"
           size="sm"
           onClick={fetchStories}
-          disabled={loading}
         >
-          <RefreshCw
-            className={`mr-2 h-4 w-4 ${
-              loading ? "animate-spin" : ""
-            }`}
-          />
-
+          <RefreshCw className="mr-2 h-4 w-4" />
           Refresh
         </Button>
       </div>
