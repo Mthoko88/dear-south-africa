@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/server"
 
 import { Header } from "@/components/header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,8 +24,13 @@ import { ImageGallery } from "@/components/image-gallery"
 
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 async function getStory(id: string) {
   try {
+    const supabase = await createClient()
+
     const { data: story, error } = await supabase
       .from("stories")
       .select(`
@@ -49,31 +54,32 @@ async function getStory(id: string) {
       `)
       .eq("id", id)
       .eq("is_published", true)
-      .maybeSingle()
+      .single()
 
-    if (error) {
-      console.error("Supabase error:", error)
+    console.log("STORY:", story)
+    console.log("ERROR:", error)
+
+    if (error || !story) {
       return null
     }
 
-    if (!story) {
-      return null
-    }
-
-    // AUTHOR
     let author = null
 
     if (story.user_id) {
       const { data } = await supabase
         .from("profiles")
-        .select("user_id, username, full_name, avatar_url")
+        .select(`
+          user_id,
+          username,
+          full_name,
+          avatar_url
+        `)
         .eq("user_id", story.user_id)
-        .maybeSingle()
+        .single()
 
       author = data
     }
 
-    // ORGANISATION
     let organisation = null
 
     if (story.organisation_id) {
@@ -87,7 +93,7 @@ async function getStory(id: string) {
           is_verified
         `)
         .eq("id", story.organisation_id)
-        .maybeSingle()
+        .single()
 
       organisation = data
     }
@@ -98,11 +104,10 @@ async function getStory(id: string) {
       organisation,
     }
   } catch (error) {
-    console.error("Error fetching story:", error)
+    console.error("GET STORY ERROR:", error)
     return null
   }
 }
-
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
