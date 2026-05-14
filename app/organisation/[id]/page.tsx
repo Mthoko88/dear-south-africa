@@ -116,45 +116,38 @@ export default function OrganisationProfilePage() {
 
       try {
         // Fetch organisation
-        const { data: org, error: orgError } = await supabase
-          .from("organisations")
-          .select(`
-          id,
-          title,
-          content,
-          user_id,
-          category,
-          content_warning,
-          location,
-          upvotes,
-          downvotes,
-          view_count,
-          created_at,
-          story_type,
-          audio_url,
-          is_anonymous,
-          cover_image,
-          media_urls,
-          organisation_id,
-          source_url,
-
-          profiles:user_id (
-            user_id,
-            username,
-            full_name,
-            avatar_url
-          ),
-
-          organisations:organisation_id (
-            id,
-            trading_name,
-            logo_url,
-            organisation_type,
-            is_verified
-          )
-        `)
-          .eq("id", params.id)
-          .single()
+       const { data: org, error: orgError } = await supabase
+  .from("organisations")
+  .select(`
+    id,
+    registered_name,
+    trading_name,
+    organisation_type,
+    registration_number,
+    description,
+    mission_statement,
+    logo_url,
+    cover_image_url,
+    website,
+    email,
+    phone,
+    physical_address,
+    city,
+    province,
+    focus_areas,
+    beneficiary_demographics,
+    beneficiary_locations,
+    facebook_url,
+    instagram_url,
+    twitter_url,
+    linkedin_url,
+    youtube_url,
+    tiktok_url,
+    is_verified,
+    created_at
+  `)
+  .eq("id", params.id)
+  .single()
 
         if (orgError) throw orgError
         setOrganisation(org)
