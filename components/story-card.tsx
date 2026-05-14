@@ -663,22 +663,35 @@ export function StoryCard({ story }: StoryCardProps) {
               )}
 
               {story.source_url && (
-                <div className="flex items-center gap-2 bg-muted/50 px-2 py-1 rounded text-xs text-muted-foreground">
-                  <ExternalLink className="h-3 w-3" />
-
-                  <span>Originally from:</span>
-
-                  <a
-                    href={story.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-primary hover:underline truncate"
-                  >
-                    {new URL(story.source_url).hostname}
-                  </a>
-                </div>
-              )}
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                    <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                    <span>Originally from:</span>
+                
+                    <a
+                      href={
+                        story.source_url.startsWith("http")
+                          ? story.source_url
+                          : `https://${story.source_url}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline truncate"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {(() => {
+                        try {
+                          return new URL(
+                            story.source_url.startsWith("http")
+                              ? story.source_url
+                              : `https://${story.source_url}`
+                          ).hostname
+                        } catch {
+                          return "External Source"
+                        }
+                      })()}
+                    </a>
+                  </div>
+                )}
 
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-t pt-3 gap-3">
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
