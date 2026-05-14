@@ -16,31 +16,29 @@ import Link from "next/link"
 
 async function getStory(id: string) {
   try {
-    const { data: story, error } = await supabase
-      .from("stories")
-      .select(
-        `
-        id,
-        title,
-        content,
-        category,
-        user_id,
-        created_at,
-        view_count,
-        is_anonymous,
-        location,
-        content_warning,
-        content_type,
-        story_type,
-        audio_url,
-        cover_image,
-        media_urls,
-        organisation_id
-      `
-      )
-      .eq("id", id)
-      .eq("is_published", true)
-      .maybeSingle()
+   const { data: story, error } = await supabase
+  .from("stories")
+  .select(`
+    id,
+    title,
+    content,
+    category,
+    user_id,
+    created_at,
+    view_count,
+    is_anonymous,
+    location,
+    content_warning,
+    content_type,
+    story_type,
+    audio_url,
+    cover_image,
+    media_urls,
+    organisation_id,
+    is_published
+  `)
+  .eq("id", id)
+  .maybeSingle()
 
     if (error || !story) return null
 
