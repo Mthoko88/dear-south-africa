@@ -131,7 +131,6 @@ export default async function StoryPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  // IMPORTANT FOR NEXT.JS 15+
   const { id } = await params
 
   const result = await getStory(id)
@@ -157,8 +156,7 @@ export default async function StoryPage({
 
         <div className="space-y-6">
 
-          {(story.cover_image ||
-            (story.media_urls && story.media_urls.length > 0)) && (
+          {(story.cover_image || story.media_urls?.length > 0) && (
             <ImageGallery
               images={story.media_urls || []}
               coverImage={story.cover_image}
@@ -167,7 +165,6 @@ export default async function StoryPage({
 
           <Card>
             <CardHeader>
-
               <div className="flex flex-wrap gap-2 mb-4">
                 <Badge className={getCategoryColor(story.category)}>
                   {story.category.replace(/-/g, " ")}
@@ -191,9 +188,7 @@ export default async function StoryPage({
                     <>
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={organisation.logo_url || ""} />
-                        <AvatarFallback>
-                          <Building2 className="h-5 w-5" />
-                        </AvatarFallback>
+                        <AvatarFallback>B</AvatarFallback>
                       </Avatar>
 
                       <div>
@@ -270,7 +265,6 @@ export default async function StoryPage({
                   </div>
                 )}
               </div>
-
             </CardHeader>
           </Card>
 
@@ -290,7 +284,6 @@ export default async function StoryPage({
           <Separator />
 
           <CommentSection storyId={story.id} />
-
         </div>
       </div>
     </div>
