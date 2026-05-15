@@ -712,14 +712,7 @@ export function StoryCard({ story }: StoryCardProps) {
                   >
                     {(() => {
                       try {
-                        const safeUrl =
-                          story.source_url?.startsWith(
-                            "http"
-                          )
-                            ? story.source_url
-                            : `https://${story.source_url}`
-
-                        return new URL(safeUrl).hostname
+                        return new URL(story.source_url).hostname
                       } catch {
                         return "External Source"
                       }
