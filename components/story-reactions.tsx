@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Heart, Bookmark, Share2, MessageCircle } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 
 interface StoryReactionsProps {
