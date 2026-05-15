@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { StoryCard } from "@/components/story-card"
 import { useAuth } from "@/lib/auth-context"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase/client"
 import { Sparkles, TrendingUp, Heart, Users, RefreshCw } from "lucide-react"
 
 interface RecommendedStory {
