@@ -45,9 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
-    if (!isSupabaseConfigured) {
-      return null
-    }
+  
     
     try {
       const { data, error } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle()
