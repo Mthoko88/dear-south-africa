@@ -38,7 +38,7 @@ import { ImageGridPreview } from "@/components/image-grid-preview"
 import { OrganisationFollowButton } from "@/components/organisation-follow-button"
 
 import { useAuth } from "@/lib/auth-context"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 
 interface StoryCardProps {
