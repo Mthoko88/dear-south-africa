@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase/client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
