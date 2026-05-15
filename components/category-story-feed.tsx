@@ -28,7 +28,7 @@ import { StoryCard } from "@/components/story-card"
 
 import { CreateStoryButton } from "@/components/create-story-button"
 
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase/client"
 
 interface Story {
   id: string
