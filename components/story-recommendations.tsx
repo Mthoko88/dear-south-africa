@@ -13,7 +13,6 @@ interface RecommendedStory {
   id: string
   title: string
   content: string
-  user_id: string
   author_id: string
   category: string
   content_warnings: string[]
@@ -80,7 +79,6 @@ const { data: profilesData } = await supabase
   .from("profiles")
   .select(`
     id,
-    user_id,
     username,
     full_name,
     avatar_url
