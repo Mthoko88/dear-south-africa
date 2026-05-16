@@ -1,11 +1,24 @@
-"use client"
+import { createBrowserClient } from '@supabase/ssr'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
-import { createBrowserClient } from "@supabase/ssr"
+let client: SupabaseClient | null = null
 
-export const createClient = () =>
-  createBrowserClient(
+export function createClient() {
+  if (client) {
+    return client
+  }
+
+  client = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      realtime: {
+        params: {
+          eventsPerSecond: 2,
+        },
+      },
+    }
   )
 
-export const supabase = createClient()
+  return client
+}
