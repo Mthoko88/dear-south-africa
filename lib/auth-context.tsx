@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import { supabase } from "@/lib/supabase/client"
+import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 import type { User, Session } from "@supabase/supabase-js"
 
 interface Profile {
@@ -45,7 +45,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
-  
+    if (!isSupabaseConfigured) {
+      return null
+    }
     
     try {
       const { data, error } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle()
