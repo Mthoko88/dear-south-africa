@@ -13,6 +13,7 @@ interface RecommendedStory {
   id: string
   title: string
   content: string
+  user_id: string
   author_id: string
   category: string
   content_warnings: string[]
