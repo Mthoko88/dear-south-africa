@@ -564,6 +564,15 @@ export function StoryCard({ story }: StoryCardProps) {
                           ORG
                         </Badge>
                       </Link>
+                      {story.organisations?.id && (
+                        <div onClick={(e) => e.stopPropagation()} className="mt-0.5">
+                          <OrganisationFollowButton 
+                            organisationId={story.organisations.id} 
+                            variant="text"
+                            className="text-xs"
+                          />
+                        </div>
+                      )}
                       <div className="flex flex-col sm:flex-row sm:items-center text-xs text-muted-foreground gap-1 sm:gap-2">
                         <span className="whitespace-nowrap">{formatDistanceToNow(new Date(story.created_at))} ago</span>
                         {story.location && (
@@ -572,18 +581,6 @@ export function StoryCard({ story }: StoryCardProps) {
                             <div className="flex items-center min-w-0">
                               <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                               <span className="truncate">{story.location}</span>
-                            </div>
-                          </>
-                        )}
-                        {story.organisations?.id && (
-                          <>
-                            <span className="hidden sm:inline">•</span>
-                            <div onClick={(e) => e.stopPropagation()}>
-                              <OrganisationFollowButton 
-                                organisationId={story.organisations.id} 
-                                variant="text"
-                                className="text-xs"
-                              />
                             </div>
                           </>
                         )}
