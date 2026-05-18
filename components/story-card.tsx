@@ -532,7 +532,7 @@ export function StoryCard({ story }: StoryCardProps) {
       <div role="link" tabIndex={0} onClick={goToStory} onKeyDown={(e) => e.key === "Enter" && router.push(`/story/${story.id}`)}>
         <Card className="hover:shadow-md transition-shadow duration-200 cursor-pointer mb-5">
           <CardHeader className="pb-3">
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
                 {/* Organisation posts */}
                 {story.organisations && story.organisations.id ? (
@@ -644,7 +644,7 @@ export function StoryCard({ story }: StoryCardProps) {
                   </>
                 )}
               </div>
-              <div className="flex flex-col sm:flex-row gap-1.5 flex-shrink-0 items-end sm:items-center">
+              <div className="flex flex-row flex-wrap gap-1.5 sm:flex-col sm:flex-nowrap sm:items-end">
                 <Badge variant="secondary" className={`text-xs max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
                   <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
                 </Badge>
