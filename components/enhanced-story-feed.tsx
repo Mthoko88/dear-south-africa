@@ -24,6 +24,7 @@ interface Story {
   audio_url?: string | null // Added audio_url field
   is_anonymous?: boolean // Added is_anonymous field
   cover_image?: string | null // Added cover_image field
+  media_urls?: string[] | null // Added media_urls field
   organisation_id?: string | null // Added organisation_id field
   source_url?: string | null // Added source_url for imported articles
   profiles?: {
@@ -62,7 +63,7 @@ export function EnhancedStoryFeed() {
       const { data: storiesData, error: storiesError } = await supabase
         .from("stories")
         .select(
-          `id, title, content, user_id, category, content_warning, location, upvotes, downvotes, view_count, created_at, story_type, audio_url, is_anonymous, cover_image, organisation_id, source_url,
+          `id, title, content, user_id, category, content_warning, location, upvotes, downvotes, view_count, created_at, story_type, audio_url, is_anonymous, cover_image, media_urls, organisation_id, source_url,
           organisations:organisation_id (id, trading_name, logo_url, organisation_type, is_verified)`,
         )
         .eq("is_published", true)

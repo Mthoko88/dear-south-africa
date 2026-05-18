@@ -64,6 +64,7 @@ interface Story {
   content: string
   category: string
   cover_image: string | null
+  media_urls?: string[] | null
   created_at: string
   is_anonymous: boolean
   upvotes: number
@@ -92,9 +93,11 @@ interface Story {
 }
 
 const ORGANISATION_TYPE_LABELS: Record<string, string> = {
+  admin: "Platform Administrator",
   ngo: "NGO",
   npo: "NPO",
   cbo: "Community-Based Organisation",
+  csi: "Corporate Social Investment",
   faith: "Faith-Based Organisation",
   foundation: "Foundation",
   trust: "Trust",
@@ -135,6 +138,7 @@ export default function OrganisationProfilePage() {
             content,
             category,
             cover_image,
+            media_urls,
             created_at,
             is_anonymous,
             upvotes,
