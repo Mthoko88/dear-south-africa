@@ -350,20 +350,16 @@ export default function OrganisationProfilePage() {
                 {stories.map((story) => (
                   <StoryCard
                     key={story.id}
-                    id={story.id}
-                    title={story.title}
-                    excerpt={story.content.substring(0, 150) + "..."}
-                    category={story.category}
-                    author={story.is_anonymous ? "Anonymous" : (story.profiles?.username || "Unknown")}
-                    authorAvatar={story.is_anonymous ? null : story.profiles?.avatar_url}
-                    coverImage={story.cover_image_url}
-                    date={new Date(story.created_at).toLocaleDateString()}
-                    upvotes={story.upvotes}
-                    downvotes={story.downvotes}
-                    commentCount={0}
-                    isOrganisation={true}
-                    organisationName={organisation.trading_name}
-                    organisationLogo={organisation.logo_url}
+                    story={{
+                      ...story,
+                      organisations: {
+                        id: organisation.id,
+                        trading_name: organisation.trading_name,
+                        logo_url: organisation.logo_url,
+                        organisation_type: organisation.organisation_type,
+                        is_verified: organisation.is_verified
+                      }
+                    }}
                   />
                 ))}
               </div>
