@@ -13,7 +13,7 @@ interface RecommendedStory {
   id: string
   title: string
   content: string
-  author_id: string
+  user_id: string
   category: string
   content_warnings: string[]
   location: string
@@ -57,9 +57,9 @@ export function StoryRecommendations() {
         .from("stories")
         .select(`
           *,
-          profiles:author_id (username, full_name, avatar_url)
+          profiles:user_id (username, full_name, avatar_url)
         `)
-        .neq("author_id", user.id)
+        .neq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(20)
 
@@ -131,7 +131,7 @@ export function StoryRecommendations() {
         .from("stories")
         .select(`
           *,
-          profiles:author_id (username, full_name, avatar_url)
+          profiles:user_id (username, full_name, avatar_url)
         `)
         .gte("created_at", sevenDaysAgo.toISOString())
         .order("upvotes", { ascending: false })
