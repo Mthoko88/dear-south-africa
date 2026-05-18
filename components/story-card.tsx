@@ -17,6 +17,8 @@ import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { MoreHorizontal } from "lucide-react"
 
 interface Author {
   username?: string
@@ -711,7 +713,7 @@ export function StoryCard({ story }: StoryCardProps) {
                   )}
                 </div>
 
-                <div className="flex items-center flex-wrap gap-1">
+                <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -739,22 +741,28 @@ export function StoryCard({ story }: StoryCardProps) {
                     <span className="text-xs">0</span>
                   </Button>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleBookmark}
-                    className={`h-8 px-2 ${isBookmarked ? "text-blue-500" : ""}`}
-                  >
-                    <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
-                  </Button>
-
-                  <Button variant="ghost" size="sm" onClick={handleShare} className="h-8 px-2">
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <ReportStoryButton storyId={story.id} storyAuthorId={story.user_id} />
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="sm" className="h-8 px-2">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenuItem onClick={handleBookmark}>
+                        <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? "fill-current text-blue-500" : ""}`} />
+                        {isBookmarked ? "Remove Bookmark" : "Bookmark"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleShare}>
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Share
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <div>
+                          <ReportStoryButton storyId={story.id} storyAuthorId={story.user_id} variant="dropdown" />
+                        </div>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>

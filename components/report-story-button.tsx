@@ -34,7 +34,7 @@ const REPORT_REASONS = [
 interface ReportStoryButtonProps {
   storyId: string
   storyAuthorId: string
-  variant?: "icon" | "menu"
+  variant?: "icon" | "menu" | "dropdown"
 }
 
 export function ReportStoryButton({ storyId, storyAuthorId, variant = "icon" }: ReportStoryButtonProps) {
@@ -129,6 +129,11 @@ export function ReportStoryButton({ storyId, storyAuthorId, variant = "icon" }: 
               <Flag className="h-4 w-4" />
               <span className="sr-only">Report story</span>
             </Button>
+          ) : variant === "dropdown" ? (
+            <button className="flex w-full items-center px-2 py-1.5 text-sm hover:bg-accent rounded cursor-pointer">
+              <Flag className="h-4 w-4 mr-2" />
+              Report
+            </button>
           ) : (
             <button className="flex w-full items-center px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 rounded">
               <Flag className="h-4 w-4 mr-2" />
