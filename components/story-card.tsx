@@ -708,7 +708,7 @@ export function StoryCard({ story }: StoryCardProps) {
                   {!isVoiceStory && (
                     <div className="flex items-center space-x-1">
                       <Clock className="h-4 w-4" />
-                      <span>{getReadingTime(safeContent)} min read</span>
+                      <span>{getReadingTime(safeContent)} min</span>
                     </div>
                   )}
                 </div>
