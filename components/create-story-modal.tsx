@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useAuth } from "@/lib/auth-context"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { Share2, FileText, BookOpen, Sparkles, Plus, Building2 } from "lucide-react"
 import { StoryTypeSelector } from "@/components/story-type-selector"
@@ -676,9 +676,6 @@ cover_image: coverImageUrl || (mediaImages.length > 0 ? mediaImages[0] : null),
 
       <Dialog open={isOpen && !showTypeSelector && !showLinkImport} onOpenChange={handleModalChange}>
         <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
-           <DialogHeader>
-            <DialogTitle>Edit Story</DialogTitle>
-          </DialogHeader>
           <div className="flex border-b">
             <button
               className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${

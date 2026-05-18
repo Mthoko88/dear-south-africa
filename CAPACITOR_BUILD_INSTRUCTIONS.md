@@ -28,38 +28,38 @@
 
 **Mac/Linux:**
 Add to `~/.bash_profile` or `~/.zshrc`:
-```bash
+\`\`\`bash
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 export PATH=$PATH:$ANDROID_HOME/tools
-```
+\`\`\`
 
 ## First Time Build
 
 ### Step 1: Install Dependencies
-```bash
+\`\`\`bash
 npm install
-```
+\`\`\`
 
 ### Step 2: Build Next.js App
-```bash
+\`\`\`bash
 npm run build
-```
+\`\`\`
 
 ### Step 3: Add Android Platform
-```bash
+\`\`\`bash
 npx cap add android
-```
+\`\`\`
 
 ### Step 4: Sync to Android
-```bash
+\`\`\`bash
 npx cap sync
-```
+\`\`\`
 
 ### Step 5: Open Android Studio
-```bash
+\`\`\`bash
 npx cap open android
-```
+\`\`\`
 
 This will open your project in Android Studio.
 
@@ -94,11 +94,11 @@ When you make changes in v0:
 Download the latest code from v0
 
 ### Step 2: Rebuild
-```bash
+\`\`\`bash
 npm run build
 npx cap sync
 npx cap open android
-```
+\`\`\`
 
 ## Troubleshooting
 

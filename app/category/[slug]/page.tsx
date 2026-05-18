@@ -1,7 +1,7 @@
 import { CategoryStoryFeed } from "@/components/category-story-feed"
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { notFound } from "next/navigation"
 
 const PREDEFINED_CATEGORIES: Record<string, { name: string; description: string }> = {

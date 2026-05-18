@@ -31,7 +31,7 @@ import {
   User,
   FileText
 } from "lucide-react"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { formatDistanceToNow } from "date-fns"

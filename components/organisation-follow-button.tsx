@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { UserPlus, UserCheck, Loader2 } from "lucide-react"
 
@@ -29,23 +29,15 @@ export function OrganisationFollowButton({
   const { toast } = useToast()
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        const userId = user?.id || null
-        setCurrentUserId(userId)
-
-        await checkFollowStatus(userId)
-      } catch (error) {
-        console.error("Init error:", error)
-      }
-    }
-
-    init()
+    checkFollowStatus()
   }, [organisationId])
 
-  const checkFollowStatus = async (userId?: string | null) => {
+  const checkFollowStatus = async () => {
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      setCurrentUserId(user?.id || null)
+
       // Get follower count
       const { count } = await supabase
         .from("organisation_follows")
@@ -54,13 +46,13 @@ export function OrganisationFollowButton({
 
       setFollowerCount(count || 0)
 
-      // Check if user is following
-      if (userId) {
+      // Check if current user is following
+      if (user) {
         const { data } = await supabase
           .from("organisation_follows")
           .select("id")
           .eq("organisation_id", organisationId)
-          .eq("user_id", userId)
+          .eq("user_id", user.id)
           .maybeSingle()
 
         setIsFollowing(!!data)
@@ -86,6 +78,7 @@ export function OrganisationFollowButton({
 
     try {
       if (isFollowing) {
+        // Unfollow
         const { error } = await supabase
           .from("organisation_follows")
           .delete()
@@ -96,12 +89,12 @@ export function OrganisationFollowButton({
 
         setIsFollowing(false)
         setFollowerCount((prev) => Math.max(0, prev - 1))
-
         toast({
           title: "Unfollowed",
-          description: "You will no longer receive updates.",
+          description: "You will no longer receive updates from this organisation.",
         })
       } else {
+        // Follow
         const { error } = await supabase
           .from("organisation_follows")
           .insert({
@@ -113,17 +106,16 @@ export function OrganisationFollowButton({
 
         setIsFollowing(true)
         setFollowerCount((prev) => prev + 1)
-
         toast({
           title: "Following!",
-          description: "You will now receive updates.",
+          description: "You will now receive updates from this organisation.",
         })
       }
     } catch (error) {
-      console.error("Follow error:", error)
+      console.error("Error toggling follow:", error)
       toast({
         title: "Error",
-        description: "Could not update follow status.",
+        description: "Could not update follow status. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -141,14 +133,13 @@ export function OrganisationFollowButton({
     )
   }
 
+  // Text variant - just shows follower count with clickable follow text
   if (variant === "text") {
     return (
       <div className={`flex items-center gap-2 text-sm ${className}`}>
         <span className="text-muted-foreground">
-          <strong className="text-foreground">{followerCount}</strong>{" "}
-          {followerCount === 1 ? "follower" : "followers"}
+          <strong className="text-foreground">{followerCount}</strong> {followerCount === 1 ? "follower" : "followers"}
         </span>
-
         {currentUserId && (
           <>
             <span className="text-muted-foreground">•</span>
@@ -167,6 +158,7 @@ export function OrganisationFollowButton({
     )
   }
 
+  // Button variant
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <Button
@@ -184,7 +176,6 @@ export function OrganisationFollowButton({
         )}
         {isFollowing ? "Following" : "Follow"}
       </Button>
-
       {showCount && (
         <span className="text-sm text-muted-foreground">
           {followerCount} {followerCount === 1 ? "follower" : "followers"}

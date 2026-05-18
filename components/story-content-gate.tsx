@@ -35,8 +35,8 @@ export function StoryContentGate({
   }
 
   return (
-    <div className="prose max-w-none dark:prose-invert [&_*]:text-foreground">
-    <FormattedText content={content} />
-  </div>
+    <div className="prose prose-gray max-w-none">
+      <FormattedText content={content} />
+    </div>
   )
 }

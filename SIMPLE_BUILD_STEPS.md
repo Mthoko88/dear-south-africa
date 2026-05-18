@@ -21,9 +21,9 @@ Before building the mobile app, deploy your Dear SA website:
 
 1. Open the file `capacitor.config.json`
 2. Find this line:
-   ```
+   \`\`\`
    "url": "https://your-deployed-site.vercel.app"
-   ```
+   \`\`\`
 3. Replace it with YOUR actual Vercel URL
 4. Save the file
 
@@ -31,10 +31,10 @@ Before building the mobile app, deploy your Dear SA website:
 
 In terminal (in your dear-sa folder):
 
-```bash
+\`\`\`bash
 npm install @capacitor/core @capacitor/cli @capacitor/android
 npx cap init
-```
+\`\`\`
 
 When prompted:
 - App name: `Dear South Africa`
@@ -43,15 +43,15 @@ When prompted:
 
 ## STEP 4: Add Android Platform (2 minutes)
 
-```bash
+\`\`\`bash
 npx cap add android
-```
+\`\`\`
 
 ## STEP 5: Open in Android Studio (1 minute)
 
-```bash
+\`\`\`bash
 npx cap open android
-```
+\`\`\`
 
 Android Studio will open. Wait for Gradle sync to finish (bottom right corner shows progress).
 

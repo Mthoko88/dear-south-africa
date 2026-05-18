@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { StoryCard } from "@/components/story-card"
 import { useAuth } from "@/lib/auth-context"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { Sparkles, TrendingUp, Heart, Users, RefreshCw } from "lucide-react"
 
 interface RecommendedStory {
@@ -55,8 +55,11 @@ export function StoryRecommendations() {
       // Get stories with similar categories/challenges to user's profile
       let query = supabase
         .from("stories")
-        .select("*")
-        .neq("user_id", user.id)
+        .select(`
+          *,
+          profiles:author_id (username, full_name, avatar_url)
+        `)
+        .neq("author_id", user.id)
         .order("created_at", { ascending: false })
         .limit(20)
 
@@ -67,36 +70,8 @@ export function StoryRecommendations() {
       const { data: stories } = await query
 
       if (stories) {
-        const userIds = [
-  ...new Set(
-    stories
-      .map((story: any) => story.user_id)
-      .filter(Boolean)
-  ),
-]
-
-const { data: profilesData } = await supabase
-  .from("profiles")
-  .select(`
-    id,
-    username,
-    full_name,
-    avatar_url
-  `)
-  .in("user_id", userIds)
-
-const profilesMap = new Map()
-
-profilesData?.forEach((profile) => {
-  profilesMap.set(profile.id, profile)
-})
         // Calculate recommendation scores
-        const storiesWithProfiles = stories.map((story) => ({
-          ...story,
-          profiles: profilesMap.get(story.user_id) || null,
-        }))
-        
-        const scoredStories = storiesWithProfiles.map((story) => {
+        const scoredStories = stories.map((story) => {
           let score = 0
           const reasons: string[] = []
 
@@ -107,7 +82,7 @@ profilesData?.forEach((profile) => {
           }
 
           // Location proximity
-          if (story.location?.includes(profile.province)) {
+          if (profile.province === story.location?.includes(profile.province)) {
             score += 20
             reasons.push("From your province")
           }
@@ -154,41 +129,16 @@ profilesData?.forEach((profile) => {
 
       const { data: stories } = await supabase
         .from("stories")
-        .select("*")
+        .select(`
+          *,
+          profiles:author_id (username, full_name, avatar_url)
+        `)
         .gte("created_at", sevenDaysAgo.toISOString())
         .order("upvotes", { ascending: false })
         .limit(10)
 
       if (stories) {
-        const userIds = [
-  ...new Set(
-    stories
-      .map((story: any) => story.user_id)
-      .filter(Boolean)
-  ),
-]
-
-const { data: profilesData } = await supabase
-  .from("profiles")
-  .select(`
-    id,
-    username,
-    full_name,
-    avatar_url
-  `)
-  .in("user_id", userIds)
-
-const profilesMap = new Map()
-
-profilesData?.forEach((profile) => {
-  profilesMap.set(profile.id, profile)
-})
-        const storiesWithProfiles = stories.map((story) => ({
-          ...story,
-          profiles: profilesMap.get(story.user_id) || null,
-        }))
-        
-        setTrending(storiesWithProfiles)
+        setTrending(stories)
       }
     } catch (error) {
       console.error("Error fetching trending stories:", error)

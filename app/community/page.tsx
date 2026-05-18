@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { Header } from "@/components/header"
 import { CommunityPolls } from "@/components/community-polls"
 import { SupportCircles } from "@/components/support-circles"

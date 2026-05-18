@@ -6,7 +6,7 @@ import Loading from "./loading" // Import the Loading component
 
 import { useEffect, useState, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { StoryCard } from "@/components/story-card"

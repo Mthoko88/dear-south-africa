@@ -1,34 +1,27 @@
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
+import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
 
-export async function POST(request: Request): Promise<NextResponse> {
-  const body = (await request.json()) as HandleUploadBody
-
+export async function POST(request: Request) {
   try {
-    const jsonResponse = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async () => {
-        return {
-          allowedContentTypes: ["audio/webm", "audio/mp3", "audio/mpeg"],
-          addRandomSuffix: true,
-          tokenPayload: JSON.stringify({
-            uploadedBy: "voice-recorder",
-          }),
-        }
-      },
+    const formData = await request.formData()
+    const file = formData.get("audio") as File
 
-      onUploadCompleted: async ({ blob }) => {
-        console.log("Upload completed:", blob.url)
-      },
+    if (!file) {
+      return NextResponse.json({ error: "No audio file provided" }, { status: 400 })
+    }
+
+    // Upload to Vercel Blob
+    const blob = await put(file.name, file, {
+      access: "public",
+      contentType: file.type,
     })
 
-    return NextResponse.json(jsonResponse)
+    return NextResponse.json({
+      url: blob.url,
+      success: true,
+    })
   } catch (error) {
-    console.error(error)
-    return NextResponse.json(
-      { error: "Upload failed" },
-      { status: 400 }
-    )
+    console.error("Error uploading audio:", error)
+    return NextResponse.json({ error: "Failed to upload audio" }, { status: 500 })
   }
 }

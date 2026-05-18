@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useAuth } from "@/lib/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { Eye, EyeOff, Mail, Lock, User, UserPlus, ArrowLeft, Loader2 } from "lucide-react"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { createClient } from "@/lib/supabase/client"
 
 interface AuthModalProps {

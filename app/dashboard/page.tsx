@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/lib/auth-context"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import {
   BookOpen,
   Users,
@@ -111,7 +111,7 @@ export default function DashboardPage() {
       const { data: commentsData, error: commentsError } = await supabase
         .from("comments")
         .select("id, content, created_at, story_id")
-        .eq("user_id", user.id)
+        .eq("author_id", user.id)
         .order("created_at", { ascending: false })
         .limit(10)
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 
 // Storage key for viewed stories - using session-based key to track per session
 const VIEWED_STORIES_KEY = "dearsa_viewed_stories_v3"

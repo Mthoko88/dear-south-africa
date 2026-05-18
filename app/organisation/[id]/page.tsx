@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,6 +21,7 @@ import {
   Instagram, 
   Twitter, 
   Linkedin,
+  Users,
   CheckCircle,
   ExternalLink,
   Loader2
@@ -63,6 +64,7 @@ interface Story {
   content: string
   category: string
   cover_image: string | null
+  media_urls?: string[] | null
   created_at: string
   is_anonymous: boolean
   upvotes: number
@@ -91,9 +93,11 @@ interface Story {
 }
 
 const ORGANISATION_TYPE_LABELS: Record<string, string> = {
+  admin: "Platform Administrator",
   ngo: "NGO",
   npo: "NPO",
   cbo: "Community-Based Organisation",
+  csi: "Corporate Social Investment",
   faith: "Faith-Based Organisation",
   foundation: "Foundation",
   trust: "Trust",
@@ -116,38 +120,11 @@ export default function OrganisationProfilePage() {
 
       try {
         // Fetch organisation
-       const { data: org, error: orgError } = await supabase
-  .from("organisations")
-  .select(`
-    id,
-    registered_name,
-    trading_name,
-    organisation_type,
-    registration_number,
-    description,
-    mission_statement,
-    logo_url,
-    cover_image_url,
-    website,
-    email,
-    phone,
-    physical_address,
-    city,
-    province,
-    focus_areas,
-    beneficiary_demographics,
-    beneficiary_locations,
-    facebook_url,
-    instagram_url,
-    twitter_url,
-    linkedin_url,
-    youtube_url,
-    tiktok_url,
-    is_verified,
-    created_at
-  `)
-  .eq("id", params.id)
-  .single()
+        const { data: org, error: orgError } = await supabase
+          .from("organisations")
+          .select("*")
+          .eq("id", params.id)
+          .single()
 
         if (orgError) throw orgError
         setOrganisation(org)
@@ -161,6 +138,7 @@ export default function OrganisationProfilePage() {
             content,
             category,
             cover_image,
+            media_urls,
             created_at,
             is_anonymous,
             upvotes,
@@ -368,13 +346,22 @@ export default function OrganisationProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {stories.map((story) => (
-                    <StoryCard
-                      key={story.id}
-                      story={story}
-                    />
-                  ))}
+                  <StoryCard
+                    key={story.id}
+                    story={{
+                      ...story,
+                      organisations: {
+                        id: organisation.id,
+                        trading_name: organisation.trading_name,
+                        logo_url: organisation.logo_url,
+                        organisation_type: organisation.organisation_type,
+                        is_verified: organisation.is_verified
+                      }
+                    }}
+                  />
+                ))}
               </div>
             )}
           </TabsContent>
