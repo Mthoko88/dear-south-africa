@@ -59,6 +59,7 @@ interface StoryCardProps {
       is_verified: boolean
     } | null
   }
+  compact?: boolean // For slimmer cards in grid layouts
 }
 
 function getEntryDate(dateString: string | null | undefined): string {
@@ -181,7 +182,7 @@ function getContentWarningSeverity(warning?: string): { color: string; level: st
   return { color: "bg-yellow-100 text-yellow-800 border-yellow-300", level: "moderate" }
 }
 
-export function StoryCard({ story }: StoryCardProps) {
+export function StoryCard({ story, compact = false }: StoryCardProps) {
   const { user } = useAuth()
   const { toast } = useToast()
   const [isLiked, setIsLiked] = useState(false)
@@ -532,61 +533,63 @@ export function StoryCard({ story }: StoryCardProps) {
   return (
     <>
       <div role="link" tabIndex={0} onClick={goToStory} onKeyDown={(e) => e.key === "Enter" && router.push(`/story/${story.id}`)}>
-        <Card className="hover:shadow-md transition-shadow duration-200 cursor-pointer mb-5">
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center space-x-3 min-w-0 flex-1">
+        <Card className={`hover:shadow-md transition-shadow duration-200 cursor-pointer ${compact ? "mb-0" : "mb-5"}`}>
+          <CardHeader className={compact ? "pb-2 px-3 pt-3" : "pb-3"}>
+            <div className={`flex items-start justify-between ${compact ? "gap-2" : "gap-3"}`}>
+              <div className={`flex items-center min-w-0 flex-1 ${compact ? "space-x-2" : "space-x-3"}`}>
                 {/* Organisation posts */}
                 {story.organisations && story.organisations.id ? (
                   <>
-                    <div className="relative flex-shrink-0">
+                    <div className={`relative flex-shrink-0 ${compact ? "self-start" : ""}`}>
                       {story.organisations.logo_url ? (
                         <img
                           src={story.organisations.logo_url}
                           alt={story.organisations.trading_name}
-                          className="h-10 w-10 object-contain rounded-lg border bg-white"
+                          className={`object-contain rounded-lg border bg-white ${compact ? "h-8 w-8" : "h-10 w-10"}`}
                         />
                       ) : (
-                        <div className="h-10 w-10 rounded-lg border bg-primary/10 flex items-center justify-center">
-                          <Building2 className="h-5 w-5 text-primary" />
+                        <div className={`rounded-lg border bg-primary/10 flex items-center justify-center ${compact ? "h-8 w-8" : "h-10 w-10"}`}>
+                          <Building2 className={compact ? "h-4 w-4 text-primary" : "h-5 w-5 text-primary"} />
                         </div>
                       )}
                       {story.organisations.is_verified && (
-                        <CheckCircle className="absolute -bottom-1 -right-1 h-4 w-4 text-primary fill-background" />
+                        <CheckCircle className={`absolute -bottom-1 -right-1 text-primary fill-background ${compact ? "h-3 w-3" : "h-4 w-4"}`} />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <Link
-                        href={`/organisation/${story.organisations.id}`}
-                        className="font-medium hover:text-primary transition-colors block truncate flex items-center gap-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {story.organisations.trading_name}
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 ml-1">
-                          ORG
-                        </Badge>
-                      </Link>
-                      <div className="flex flex-col sm:flex-row sm:items-center text-xs text-muted-foreground gap-1 sm:gap-2">
+                      <div className={compact ? "flex flex-col gap-0.5" : ""}>
+                        <Link
+                          href={`/organisation/${story.organisations.id}`}
+                          className={`font-medium hover:text-primary transition-colors block truncate flex items-center gap-1 ${compact ? "text-sm" : ""}`}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {story.organisations.trading_name}
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 ml-1">
+                            ORG
+                          </Badge>
+                        </Link>
+                        {story.organisations?.id && (
+                          <div onClick={(e) => e.stopPropagation()} className={compact ? "" : "mt-0.5"}>
+                            <OrganisationFollowButton 
+                              organisationId={story.organisations.id} 
+                              variant="text"
+                              className={compact ? "text-[10px] h-auto py-0" : "text-xs"}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <div className={`flex flex-col sm:flex-row sm:items-center text-muted-foreground gap-1 sm:gap-2 ${compact ? "text-[10px] mt-0.5" : "text-xs"}`}>
                         <span className="whitespace-nowrap">{formatDistanceToNow(new Date(story.created_at))} ago</span>
                         {story.location && (
                           <>
                             <span className="hidden sm:inline">•</span>
                             <div className="flex items-center min-w-0">
-                              <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                              <MapPin className={`mr-1 flex-shrink-0 ${compact ? "h-2.5 w-2.5" : "h-3 w-3"}`} />
                               <span className="truncate">{story.location}</span>
                             </div>
                           </>
                         )}
                       </div>
-                      {story.organisations?.id && (
-                        <div onClick={(e) => e.stopPropagation()} className="mt-0.5">
-                          <OrganisationFollowButton 
-                            organisationId={story.organisations.id} 
-                            variant="text"
-                            className="text-xs"
-                          />
-                        </div>
-                      )}
                     </div>
                   </>
                 ) : story.is_anonymous ? (
@@ -646,26 +649,26 @@ export function StoryCard({ story }: StoryCardProps) {
                   </>
                 )}
               </div>
-              <div className="flex flex-col sm:flex-row gap-1.5 flex-shrink-0 items-end sm:items-center">
-                <Badge variant="secondary" className={`text-xs max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
+              <div className={`flex flex-col gap-1 flex-shrink-0 items-end ${compact ? "" : "sm:flex-row sm:gap-1.5 sm:items-center"}`}>
+                <Badge variant="secondary" className={`max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)} ${compact ? "text-[10px] px-1.5 py-0" : "text-xs"}`}>
                   <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
                 </Badge>
                 {story.content_warning && (
                   <Badge 
                     variant="outline" 
-                    className={`text-xs max-w-[120px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color}`}
+                    className={`max-w-[120px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color} ${compact ? "text-[10px] px-1.5 py-0" : "text-xs"}`}
                     title={`Content Warning: ${story.content_warning}`}
                   >
-                    <span className="truncate">{"⚠️ "}<span className="hidden sm:inline">{story.content_warning}</span><span className="sm:hidden">{story.content_warning.length > 10 ? story.content_warning.slice(0, 10) + "..." : story.content_warning}</span></span>
+                    <span className="truncate">{"⚠️ "}{compact ? (story.content_warning.length > 8 ? story.content_warning.slice(0, 8) + "..." : story.content_warning) : <><span className="hidden sm:inline">{story.content_warning}</span><span className="sm:hidden">{story.content_warning.length > 10 ? story.content_warning.slice(0, 10) + "..." : story.content_warning}</span></>}</span>
                   </Badge>
                 )}
               </div>
             </div>
           </CardHeader>
 
-<CardContent className="pt-0">
-  <div className="space-y-3">
-  <h3 className="font-semibold text-2xl hover:text-primary transition-colors line-clamp-2">{story.title}</h3>
+<CardContent className={compact ? "pt-0 px-3 pb-3" : "pt-0"}>
+  <div className={compact ? "space-y-2" : "space-y-3"}>
+  <h3 className={`font-semibold hover:text-primary transition-colors line-clamp-2 ${compact ? "text-base" : "text-2xl"}`}>{story.title}</h3>
   {(story.cover_image || (story.media_urls && story.media_urls.length > 0)) && (
     <ImageGridPreview 
       images={story.media_urls || []} 
@@ -699,30 +702,30 @@ export function StoryCard({ story }: StoryCardProps) {
               )}
 
               {/* Story stats */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-2 border-t gap-3">
-                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                  <div className="flex items-center space-x-1">
-                    <Eye className="h-4 w-4" />
+              <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between border-t ${compact ? "pt-1.5 gap-1.5" : "pt-2 gap-3"}`}>
+                <div className={`flex items-center text-muted-foreground ${compact ? "space-x-2 text-xs" : "space-x-4 text-sm"}`}>
+                  <div className={`flex items-center ${compact ? "gap-0.5" : "space-x-1"}`}>
+                    <Eye className={compact ? "h-3 w-3" : "h-4 w-4"} />
                     <span>{story.view_count || 0}</span>
                   </div>
                   {!isVoiceStory && (
-                    <div className="flex items-center space-x-1">
-                      <Clock className="h-4 w-4" />
-                      <span>{getReadingTime(safeContent)} min</span>
+                    <div className={`flex items-center ${compact ? "gap-0.5" : "space-x-1"}`}>
+                      <Clock className={compact ? "h-3 w-3" : "h-4 w-4"} />
+                      <span>{getReadingTime(safeContent)}{compact ? "m" : " min"}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className={`flex items-center ${compact ? "gap-0" : "gap-1"}`}>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={(e) => handleVote("upvote", e)}
                     disabled={loading}
-                    className={`h-8 px-2 ${userVote === "upvote" ? "text-green-600 bg-green-50" : ""}`}
+                    className={`${compact ? "h-6 px-1" : "h-8 px-2"} ${userVote === "upvote" ? "text-green-600 bg-green-50" : ""}`}
                   >
-                    <ArrowUp className={`h-4 w-4 mr-1 ${userVote === "upvote" ? "fill-current" : ""}`} />
-                    <span className="text-xs">{upvoteCount}</span>
+                    <ArrowUp className={`${compact ? "h-3 w-3 mr-0.5" : "h-4 w-4 mr-1"} ${userVote === "upvote" ? "fill-current" : ""}`} />
+                    <span className={compact ? "text-[10px]" : "text-xs"}>{upvoteCount}</span>
                   </Button>
 
                   <Button
@@ -730,21 +733,21 @@ export function StoryCard({ story }: StoryCardProps) {
                     size="sm"
                     onClick={(e) => handleVote("downvote", e)}
                     disabled={loading}
-                    className={`h-8 px-2 ${userVote === "downvote" ? "text-red-600 bg-red-50" : ""}`}
+                    className={`${compact ? "h-6 px-1" : "h-8 px-2"} ${userVote === "downvote" ? "text-red-600 bg-red-50" : ""}`}
                   >
-                    <ArrowDown className={`h-4 w-4 mr-1 ${userVote === "downvote" ? "fill-current" : ""}`} />
-                    <span className="text-xs">{downvoteCount}</span>
+                    <ArrowDown className={`${compact ? "h-3 w-3 mr-0.5" : "h-4 w-4 mr-1"} ${userVote === "downvote" ? "fill-current" : ""}`} />
+                    <span className={compact ? "text-[10px]" : "text-xs"}>{downvoteCount}</span>
                   </Button>
 
-                  <Button variant="ghost" size="sm" className="h-8 px-2">
-                    <MessageCircle className="h-4 w-4 mr-1" />
-                    <span className="text-xs">0</span>
+                  <Button variant="ghost" size="sm" className={compact ? "h-6 px-1" : "h-8 px-2"}>
+                    <MessageCircle className={compact ? "h-3 w-3 mr-0.5" : "h-4 w-4 mr-1"} />
+                    <span className={compact ? "text-[10px]" : "text-xs"}>0</span>
                   </Button>
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="sm" className="h-8 px-2">
-                        <MoreHorizontal className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" className={compact ? "h-6 px-1" : "h-8 px-2"}>
+                        <MoreHorizontal className={compact ? "h-3 w-3" : "h-4 w-4"} />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
