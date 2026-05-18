@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/server"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -46,6 +46,8 @@ async function getProfile(username: string) {
   }
 
   try {
+    const supabase = await createClient()
+    
     // maybeSingle() avoids the "multiple (or no) rows returned" runtime error
     const { data, error } = await supabase.from("profiles").select("*").eq("username", username).limit(1).maybeSingle()
 
@@ -70,6 +72,8 @@ async function getProfile(username: string) {
 
 async function getUserStories(userId: string): Promise<Story[]> {
   try {
+    const supabase = await createClient()
+    
     const { data, error } = await supabase
       .from("stories")
       .select(`

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/server"
 import { Header } from "@/components/header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -17,6 +17,8 @@ import Link from "next/link"
 
 async function getStory(id: string) {
   try {
+    const supabase = await createClient()
+    
     // Fetch story
     const { data: story, error: storyError } = await supabase
       .from("stories")
