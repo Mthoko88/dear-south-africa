@@ -535,7 +535,7 @@ export function StoryCard({ story }: StoryCardProps) {
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
                 {/* Organisation posts */}
-                {story.organisations ? (
+                {story.organisations && story.organisations.id ? (
                   <>
                     <div className="relative flex-shrink-0">
                       {story.organisations.logo_url ? (
