@@ -4,11 +4,6 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 let client: SupabaseClient | null = null
 
 export function createClient() {
-  // Only create client on the browser
-  if (typeof window === 'undefined') {
-    throw new Error('createClient should only be called on the client side')
-  }
-  
   if (client) {
     return client
   }
