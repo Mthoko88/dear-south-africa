@@ -576,13 +576,15 @@ export function StoryCard({ story }: StoryCardProps) {
                           </>
                         )}
                       </div>
-                      <div onClick={(e) => e.stopPropagation()} className="mt-1">
-                        <OrganisationFollowButton 
-                          organisationId={story.organisations.id} 
-                          variant="text"
-                          className="text-xs"
-                        />
-                      </div>
+                      {story.organisations?.id && (
+                        <div onClick={(e) => e.stopPropagation()} className="mt-1">
+                          <OrganisationFollowButton 
+                            organisationId={story.organisations.id} 
+                            variant="text"
+                            className="text-xs"
+                          />
+                        </div>
+                      )}
                     </div>
                   </>
                 ) : story.is_anonymous ? (
