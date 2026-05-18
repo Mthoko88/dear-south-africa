@@ -1,7 +1,7 @@
 import { CategoryStoryFeed } from "@/components/category-story-feed"
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 
 const PREDEFINED_CATEGORIES: Record<string, { name: string; description: string }> = {
@@ -37,6 +37,8 @@ const PREDEFINED_CATEGORIES: Record<string, { name: string; description: string 
 
 async function fetchCategory(slug: string) {
   try {
+    const supabase = await createClient()
+    
     const { data, error } = await supabase
       .from("categories")
       .select("slug, name, description")

@@ -1,8 +1,9 @@
 "use client"
 
-import { createClient } from "@/lib/supabase/client"
+import { createClient as createBrowserClient } from "@/lib/supabase/client"
 
 export const isSupabaseConfigured = true
 
-// Re-export the singleton client
-export const supabase = createClient()
+// Export both the function and a singleton instance for convenience
+export const createClient = createBrowserClient
+export const supabase = createBrowserClient()
