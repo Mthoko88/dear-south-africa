@@ -564,15 +564,6 @@ export function StoryCard({ story }: StoryCardProps) {
                           ORG
                         </Badge>
                       </Link>
-                      {story.organisations?.id && (
-                        <div onClick={(e) => e.stopPropagation()} className="mt-0.5">
-                          <OrganisationFollowButton 
-                            organisationId={story.organisations.id} 
-                            variant="text"
-                            className="text-xs"
-                          />
-                        </div>
-                      )}
                       <div className="flex flex-col sm:flex-row sm:items-center text-xs text-muted-foreground gap-1 sm:gap-2">
                         <span className="whitespace-nowrap">{formatDistanceToNow(new Date(story.created_at))} ago</span>
                         {story.location && (
@@ -585,6 +576,15 @@ export function StoryCard({ story }: StoryCardProps) {
                           </>
                         )}
                       </div>
+                      {story.organisations?.id && (
+                        <div onClick={(e) => e.stopPropagation()} className="mt-0.5">
+                          <OrganisationFollowButton 
+                            organisationId={story.organisations.id} 
+                            variant="text"
+                            className="text-xs"
+                          />
+                        </div>
+                      )}
                     </div>
                   </>
                 ) : story.is_anonymous ? (
