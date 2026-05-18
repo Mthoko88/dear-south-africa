@@ -711,7 +711,7 @@ export function StoryCard({ story }: StoryCardProps) {
                   )}
                 </div>
 
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center flex-wrap gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
