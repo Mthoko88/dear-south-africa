@@ -160,7 +160,7 @@ export function OrganisationFollowButton({
 
   // Button variant
   return (
-    <div className={`flex items-center gap-1 rounded-full ${className}`}>
+    <div className={`flex items-center gap-1 mt-2 rounded-full ${className}`}>
       <Button
         variant={isFollowing ? "outline" : "default"}
         size={size}
