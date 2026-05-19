@@ -580,9 +580,7 @@ export function StoryCard({ story }: StoryCardProps) {
                       </div>
                       
                     </div>
-                     
-                  </>
-                  <div>
+                     <div className="flex flex-col">
                     {story.organisations?.id && (
                         <div onClick={(e) => e.stopPropagation()} className="mt-0.5">
                           <OrganisationFollowButton 
@@ -592,7 +590,9 @@ export function StoryCard({ story }: StoryCardProps) {
                           />
                         </div>
                       )}
-                    </div> 
+                    </div>
+                  </>
+                   
                 ) : story.is_anonymous ? (
                   <>
                     <Avatar className="h-10 w-10 flex-shrink-0">
