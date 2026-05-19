@@ -580,10 +580,19 @@ export function StoryCard({ story }: StoryCardProps) {
                       </div>
                       
                     </div>
-                    <div>
-                    
-                    </div>  
+                     <div className="flex flex-col">
+                    {story.organisations?.id && (
+                        <div onClick={(e) => e.stopPropagation()} className="mt-0.5">
+                          <OrganisationFollowButton 
+                            organisationId={story.organisations.id} 
+                            variant="text"
+                            className="text-xs"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </>
+                   
                 ) : story.is_anonymous ? (
                   <>
                     <Avatar className="h-10 w-10 flex-shrink-0">
@@ -641,8 +650,8 @@ export function StoryCard({ story }: StoryCardProps) {
                   </>
                 )}
               </div>
-              <div className="flex flex-col gap-1 flex-shrink-0 items-end">
-                <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 h-4 max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
+              <div className="flex flex-col sm:flex-row gap-1.5 flex-shrink-0 items-end sm:items-center">
+                <Badge variant="secondary" className={`text-xs max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
                   <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
                 </Badge>
                 {story.content_warning && (
@@ -671,7 +680,7 @@ export function StoryCard({ story }: StoryCardProps) {
 
 <CardContent className="pt-0">
   <div className="space-y-3">
-  <h3 className="font-serif font-semibold text-2xl hover:text-primary transition-colors line-clamp-2">{story.title}</h3>
+  <h3 className="font-bold font-serif text-2xl hover:text-primary transition-colors line-clamp-2">{story.title}</h3>
   {(story.cover_image || (story.media_urls && story.media_urls.length > 0)) && (
     <ImageGridPreview 
       images={story.media_urls || []} 
