@@ -781,7 +781,7 @@ export function StoryCard({ story }: StoryCardProps) {
             <DialogTitle>Share Story</DialogTitle>
             <DialogDescription>Choose a platform to share this story</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-3 py-4">
+          <div className="grid grid-cols-2 text-xs gap-3 py-4">
             <Button
               variant="outline"
               className="flex flex-col items-center gap-2 h-auto py-4 bg-transparent"
