@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Mic, Square, Trash2, Upload } from "lucide-react"
+import { Mic, Square, Trash2, Upload, Pause, Play, RotateCcw } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+import { Progress } from "@/components/ui/progress"
 
 interface VoiceRecorderProps {
   onAudioReady: (audioUrl: string, duration: number) => void
@@ -12,25 +13,49 @@ interface VoiceRecorderProps {
 
 export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
   const [isRecording, setIsRecording] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [duration, setDuration] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
+  const [audioLevels, setAudioLevels] = useState<number[]>([])
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const animationFrameRef = useRef<number | null>(null)
+
+  const MAX_DURATION = 300 // 5 minutes max
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
-      if (audioUrl) URL.revokeObjectURL(audioUrl)
+      cleanup()
     }
-  }, [audioUrl])
+  }, [])
+
+  const cleanup = () => {
+    if (timerRef.current) clearInterval(timerRef.current)
+    if (audioUrl) URL.revokeObjectURL(audioUrl)
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current)
+    if (audioContextRef.current) audioContextRef.current.close()
+    if (streamRef.current) streamRef.current.getTracks().forEach(track => track.stop())
+  }
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      streamRef.current = stream
+      
+      // Set up audio visualization
+      audioContextRef.current = new AudioContext()
+      const source = audioContextRef.current.createMediaStreamSource(stream)
+      analyserRef.current = audioContextRef.current.createAnalyser()
+      analyserRef.current.fftSize = 256
+      source.connect(analyserRef.current)
+      
       const mediaRecorder = new MediaRecorder(stream)
       mediaRecorderRef.current = mediaRecorder
       chunksRef.current = []
@@ -46,20 +71,36 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
         setAudioBlob(blob)
         const url = URL.createObjectURL(blob)
         setAudioUrl(url)
-        stream.getTracks().forEach((track) => track.stop())
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop())
+        }
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current)
+        }
       }
 
-      mediaRecorder.start()
+      mediaRecorder.start(100) // Collect data every 100ms for better pause support
       setIsRecording(true)
+      setIsPaused(false)
       setDuration(0)
+      setAudioLevels([])
 
       timerRef.current = setInterval(() => {
-        setDuration((prev) => prev + 1)
+        setDuration((prev) => {
+          if (prev >= MAX_DURATION) {
+            stopRecording()
+            return prev
+          }
+          return prev + 1
+        })
       }, 1000)
+
+      // Start audio visualization
+      visualizeAudio()
 
       toast({
         title: "Recording started",
-        description: "Speak clearly to share your story",
+        description: "Speak clearly to share your story. You can pause anytime.",
       })
     } catch (error) {
       toast({
@@ -70,10 +111,75 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
     }
   }
 
+  const visualizeAudio = () => {
+    if (!analyserRef.current) return
+    
+    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount)
+    
+    const updateLevels = () => {
+      if (!analyserRef.current || isPaused) {
+        animationFrameRef.current = requestAnimationFrame(updateLevels)
+        return
+      }
+      
+      analyserRef.current.getByteFrequencyData(dataArray)
+      const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length
+      
+      setAudioLevels(prev => {
+        const newLevels = [...prev, average / 255 * 100]
+        // Keep only last 50 levels for visualization
+        if (newLevels.length > 50) newLevels.shift()
+        return newLevels
+      })
+      
+      animationFrameRef.current = requestAnimationFrame(updateLevels)
+    }
+    
+    updateLevels()
+  }
+
+  const pauseRecording = () => {
+    if (mediaRecorderRef.current && isRecording && !isPaused) {
+      mediaRecorderRef.current.pause()
+      setIsPaused(true)
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+      toast({
+        title: "Recording paused",
+        description: "Press play to continue recording",
+      })
+    }
+  }
+
+  const resumeRecording = () => {
+    if (mediaRecorderRef.current && isRecording && isPaused) {
+      mediaRecorderRef.current.resume()
+      setIsPaused(false)
+      
+      timerRef.current = setInterval(() => {
+        setDuration((prev) => {
+          if (prev >= MAX_DURATION) {
+            stopRecording()
+            return prev
+          }
+          return prev + 1
+        })
+      }, 1000)
+      
+      toast({
+        title: "Recording resumed",
+        description: "Continue sharing your story",
+      })
+    }
+  }
+
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop()
       setIsRecording(false)
+      setIsPaused(false)
       if (timerRef.current) {
         clearInterval(timerRef.current)
         timerRef.current = null
@@ -86,6 +192,12 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
     setAudioBlob(null)
     setAudioUrl(null)
     setDuration(0)
+    setAudioLevels([])
+  }
+
+  const restartRecording = () => {
+    deleteRecording()
+    startRecording()
   }
 
   const uploadRecording = async () => {
@@ -131,31 +243,107 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
   return (
     <div className="flex flex-col items-center gap-6 py-8">
       <div className="text-center space-y-2">
-        <h3 className="text-lg font-semibold">{!audioBlob ? "Record Your Story" : "Preview Your Recording"}</h3>
+        <h3 className="text-lg font-semibold">
+          {!audioBlob ? (isRecording ? (isPaused ? "Recording Paused" : "Recording...") : "Record Your Story") : "Preview Your Recording"}
+        </h3>
         <p className="text-sm text-muted-foreground">
-          {!audioBlob ? "Press the microphone to start recording" : "Listen to your recording or record again"}
+          {!audioBlob 
+            ? (isRecording 
+                ? "You can pause, resume, or stop your recording anytime" 
+                : "Press the microphone to start recording")
+            : "Listen to your recording or record again"}
         </p>
       </div>
 
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-4 w-full max-w-md">
         {!audioBlob ? (
           <>
-            <div className="relative">
-              <Button
-                size="lg"
-                onClick={isRecording ? stopRecording : startRecording}
-                className={`h-24 w-24 rounded-full ${isRecording ? "bg-red-600 hover:bg-red-700" : ""}`}
-              >
-                {isRecording ? <Square className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
-              </Button>
+            {/* Audio visualization */}
+            {isRecording && (
+              <div className="flex items-end justify-center gap-1 h-16 w-full px-4">
+                {audioLevels.slice(-30).map((level, i) => (
+                  <div 
+                    key={i} 
+                    className={`w-2 rounded-full transition-all duration-75 ${isPaused ? 'bg-muted' : 'bg-primary'}`}
+                    style={{ height: `${Math.max(4, level * 0.6)}px` }}
+                  />
+                ))}
+                {audioLevels.length < 30 && [...Array(30 - audioLevels.length)].map((_, i) => (
+                  <div key={`empty-${i}`} className="w-2 h-1 rounded-full bg-muted" />
+                ))}
+              </div>
+            )}
+
+            {/* Recording controls */}
+            <div className="flex items-center gap-4">
               {isRecording && (
-                <div className="absolute -top-2 -right-2 h-4 w-4 bg-red-600 rounded-full animate-pulse" />
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={restartRecording}
+                  className="h-14 w-14 rounded-full bg-transparent"
+                  title="Restart recording"
+                >
+                  <RotateCcw className="h-6 w-6" />
+                </Button>
+              )}
+
+              <div className="relative">
+                <Button
+                  size="lg"
+                  onClick={isRecording ? stopRecording : startRecording}
+                  className={`h-24 w-24 rounded-full ${isRecording ? "bg-red-600 hover:bg-red-700" : ""}`}
+                >
+                  {isRecording ? <Square className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
+                </Button>
+                {isRecording && !isPaused && (
+                  <div className="absolute -top-2 -right-2 h-4 w-4 bg-red-600 rounded-full animate-pulse" />
+                )}
+              </div>
+
+              {isRecording && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={isPaused ? resumeRecording : pauseRecording}
+                  className="h-14 w-14 rounded-full bg-transparent"
+                  title={isPaused ? "Resume recording" : "Pause recording"}
+                >
+                  {isPaused ? <Play className="h-6 w-6" /> : <Pause className="h-6 w-6" />}
+                </Button>
               )}
             </div>
 
             <div className="text-2xl font-mono font-semibold">{formatTime(duration)}</div>
 
-            {isRecording && <p className="text-sm text-muted-foreground animate-pulse">Recording in progress...</p>}
+            {/* Duration progress bar */}
+            {isRecording && (
+              <div className="w-full space-y-1">
+                <Progress value={(duration / MAX_DURATION) * 100} className="h-2" />
+                <p className="text-xs text-muted-foreground text-center">
+                  {formatTime(MAX_DURATION - duration)} remaining
+                </p>
+              </div>
+            )}
+
+            {isRecording && (
+              <p className={`text-sm ${isPaused ? 'text-muted-foreground' : 'text-muted-foreground animate-pulse'}`}>
+                {isPaused ? "Paused - press play to continue" : "Recording in progress..."}
+              </p>
+            )}
+
+            {/* Recording tips */}
+            {!isRecording && (
+              <div className="text-xs text-muted-foreground text-center space-y-1 mt-4">
+                <p>Tips for a great recording:</p>
+                <ul className="space-y-0.5">
+                  <li>Find a quiet space</li>
+                  <li>Speak clearly and at a natural pace</li>
+                  <li>You can pause and resume anytime</li>
+                  <li>Maximum recording length: 5 minutes</li>
+                </ul>
+              </div>
+            )}
           </>
         ) : (
           <>

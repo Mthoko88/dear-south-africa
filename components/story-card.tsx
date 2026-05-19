@@ -59,6 +59,7 @@ interface StoryCardProps {
       is_verified: boolean
     } | null
   }
+  variant?: "default" | "discover" // Added variant prop
 }
 
 function getEntryDate(dateString: string | null | undefined): string {
@@ -181,7 +182,7 @@ function getContentWarningSeverity(warning?: string): { color: string; level: st
   return { color: "bg-yellow-100 text-yellow-800 border-yellow-300", level: "moderate" }
 }
 
-export function StoryCard({ story }: StoryCardProps) {
+export function StoryCard({ story, variant = "default" }: StoryCardProps) {
   const { user } = useAuth()
   const { toast } = useToast()
   const [isLiked, setIsLiked] = useState(false)
@@ -534,6 +535,23 @@ export function StoryCard({ story }: StoryCardProps) {
       <div role="link" tabIndex={0} onClick={goToStory} onKeyDown={(e) => e.key === "Enter" && router.push(`/story/${story.id}`)} className="h-full w-full">
         <Card className="hover:shadow-md transition-shadow duration-200 cursor-pointer mb-5 h-full flex flex-col">
           <CardHeader className="pb-3">
+            {/* Discover variant: badges above avatar */}
+            {variant === "discover" && (
+              <div className="flex flex-wrap gap-1 mb-3 items-start">
+                <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 h-4 ${getCategoryColor(safeCategory)}`}>
+                  <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
+                </Badge>
+                {story.content_warning && (
+                  <Badge 
+                    variant="outline" 
+                    className={`text-[10px] px-1.5 py-0 h-4 border ${getContentWarningSeverity(story.content_warning).color}`}
+                    title={`Content Warning: ${story.content_warning}`}
+                  >
+                    <span className="truncate">{"⚠️ "}{story.content_warning.length > 8 ? story.content_warning.slice(0, 8) + "..." : story.content_warning}</span>
+                  </Badge>
+                )}
+              </div>
+            )}
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
                 {/* Organisation posts */}
@@ -641,20 +659,22 @@ export function StoryCard({ story }: StoryCardProps) {
                   </>
                 )}
               </div>
-              <div className="flex flex-col gap-1 flex-shrink-0 items-end">
-                <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 h-4 max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
-                  <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
-                </Badge>
-                {story.content_warning && (
-                  <Badge 
-                    variant="outline" 
-                    className={`text-[10px] px-1.5 py-0 h-4 max-w-[100px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color}`}
-                    title={`Content Warning: ${story.content_warning}`}
-                  >
-                    <span className="truncate">{"⚠️ "}{story.content_warning.length > 8 ? story.content_warning.slice(0, 8) + "..." : story.content_warning}</span>
+              {variant !== "discover" && (
+                <div className="flex flex-col gap-1 flex-shrink-0 items-end">
+                  <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 h-4 max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
+                    <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
                   </Badge>
-                )}
-              </div>
+                  {story.content_warning && (
+                    <Badge 
+                      variant="outline" 
+                      className={`text-[10px] px-1.5 py-0 h-4 max-w-[100px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color}`}
+                      title={`Content Warning: ${story.content_warning}`}
+                    >
+                      <span className="truncate">{"⚠️ "}{story.content_warning.length > 8 ? story.content_warning.slice(0, 8) + "..." : story.content_warning}</span>
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Organisation Follow Button - moved outside header */}
