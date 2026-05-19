@@ -748,7 +748,7 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                     size="sm"
                     onClick={(e) => handleVote("upvote", e)}
                     disabled={loading}
-                    className={`h-6 px-1.5 ${userVote === "upvote" ? "text-green-600 bg-green-50" : ""}`}
+                    className={`h-6 px-1 ${userVote === "upvote" ? "text-green-600 bg-green-50" : ""}`}
                   >
                     <ArrowUp className={`h-3 w-3 mr-0.5 ${userVote === "upvote" ? "fill-current" : ""}`} />
                     <span className="text-[10px]">{upvoteCount}</span>
@@ -759,7 +759,7 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                     size="sm"
                     onClick={(e) => handleVote("downvote", e)}
                     disabled={loading}
-                    className={`h-6 px-1.5 ${userVote === "downvote" ? "text-red-600 bg-red-50" : ""}`}
+                    className={`h-6 px-1 ${userVote === "downvote" ? "text-red-600 bg-red-50" : ""}`}
                   >
                     <ArrowDown className={`h-3 w-3 mr-0.5 ${userVote === "downvote" ? "fill-current" : ""}`} />
                     <span className="text-[10px]">{downvoteCount}</span>
