@@ -581,15 +581,7 @@ export function StoryCard({ story }: StoryCardProps) {
                       
                     </div>
                     <div>
-                    {story.organisations?.id && (
-                        <div onClick={(e) => e.stopPropagation()} className="mt-0.5">
-                          <OrganisationFollowButton 
-                            organisationId={story.organisations.id} 
-                            variant="text"
-                            className="text-xs"
-                          />
-                        </div>
-                      )}
+                    
                     </div>  
                   </>
                 ) : story.is_anonymous ? (
@@ -649,26 +641,37 @@ export function StoryCard({ story }: StoryCardProps) {
                   </>
                 )}
               </div>
-              <div className="flex-col sm:flex-row gap-1.5 flex-shrink-0 items-end sm:items-center">
-                <Badge variant="secondary" className={`text-xs max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
+              <div className="flex flex-col gap-1 flex-shrink-0 items-end">
+                <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 h-4 max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
                   <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
                 </Badge>
                 {story.content_warning && (
                   <Badge 
                     variant="outline" 
-                    className={`text-xs max-w-[120px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color}`}
+                    className={`text-[10px] px-1.5 py-0 h-4 max-w-[100px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color}`}
                     title={`Content Warning: ${story.content_warning}`}
                   >
-                    <span className="truncate">{"⚠️ "}<span className="hidden sm:inline">{story.content_warning}</span><span className="sm:hidden">{story.content_warning.length > 10 ? story.content_warning.slice(0, 10) + "..." : story.content_warning}</span></span>
+                    <span className="truncate">{"⚠️ "}{story.content_warning.length > 8 ? story.content_warning.slice(0, 8) + "..." : story.content_warning}</span>
                   </Badge>
                 )}
               </div>
             </div>
+
+            {/* Organisation Follow Button - moved outside header */}
+            {story.organisations?.id && (
+              <div onClick={(e) => e.stopPropagation()} className="pt-2 border-t mt-3">
+                <OrganisationFollowButton 
+                  organisationId={story.organisations.id} 
+                  variant="outline"
+                  className="text-xs w-full"
+                />
+              </div>
+            )}
           </CardHeader>
 
 <CardContent className="pt-0">
   <div className="space-y-3">
-  <h3 className="font-semibold text-2xl hover:text-primary transition-colors line-clamp-2">{story.title}</h3>
+  <h3 className="font-serif font-semibold text-2xl hover:text-primary transition-colors line-clamp-2">{story.title}</h3>
   {(story.cover_image || (story.media_urls && story.media_urls.length > 0)) && (
     <ImageGridPreview 
       images={story.media_urls || []} 
@@ -681,7 +684,7 @@ export function StoryCard({ story }: StoryCardProps) {
                   <audio src={story.audio_url} controls className="w-full" preload="metadata" />
                 </div>
               ) : (
-                <p className="text-muted-foreground leading-relaxed line-clamp-3">{getPreviewContent(safeContent)}</p>
+                <p className="font-serif text-muted-foreground leading-relaxed line-clamp-3">{getPreviewContent(safeContent)}</p>
               )}
 
               {/* Source URL indicator */}
@@ -702,30 +705,30 @@ export function StoryCard({ story }: StoryCardProps) {
               )}
 
               {/* Story stats */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-2 border-t gap-3">
-                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-2 border-t gap-2 sm:gap-3">
+                <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-muted-foreground">
                   <div className="flex items-center space-x-1">
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span>{story.view_count || 0}</span>
                   </div>
                   {!isVoiceStory && (
                     <div className="flex items-center space-x-1">
-                      <Clock className="h-4 w-4" />
+                      <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span>{getReadingTime(safeContent)} min</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={(e) => handleVote("upvote", e)}
                     disabled={loading}
-                    className={`h-8 px-2 ${userVote === "upvote" ? "text-green-600 bg-green-50" : ""}`}
+                    className={`h-7 sm:h-8 px-1.5 sm:px-2 ${userVote === "upvote" ? "text-green-600 bg-green-50" : ""}`}
                   >
-                    <ArrowUp className={`h-4 w-4 mr-1 ${userVote === "upvote" ? "fill-current" : ""}`} />
-                    <span className="text-xs">{upvoteCount}</span>
+                    <ArrowUp className={`h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 ${userVote === "upvote" ? "fill-current" : ""}`} />
+                    <span className="text-[10px] sm:text-xs">{upvoteCount}</span>
                   </Button>
 
                   <Button
@@ -733,21 +736,21 @@ export function StoryCard({ story }: StoryCardProps) {
                     size="sm"
                     onClick={(e) => handleVote("downvote", e)}
                     disabled={loading}
-                    className={`h-8 px-2 ${userVote === "downvote" ? "text-red-600 bg-red-50" : ""}`}
+                    className={`h-7 sm:h-8 px-1.5 sm:px-2 ${userVote === "downvote" ? "text-red-600 bg-red-50" : ""}`}
                   >
-                    <ArrowDown className={`h-4 w-4 mr-1 ${userVote === "downvote" ? "fill-current" : ""}`} />
-                    <span className="text-xs">{downvoteCount}</span>
+                    <ArrowDown className={`h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 ${userVote === "downvote" ? "fill-current" : ""}`} />
+                    <span className="text-[10px] sm:text-xs">{downvoteCount}</span>
                   </Button>
 
-                  <Button variant="ghost" size="sm" className="h-8 px-2">
-                    <MessageCircle className="h-4 w-4 mr-1" />
-                    <span className="text-xs">0</span>
+                  <Button variant="ghost" size="sm" className="h-7 sm:h-8 px-1.5 sm:px-2">
+                    <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1" />
+                    <span className="text-[10px] sm:text-xs">0</span>
                   </Button>
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="sm" className="h-8 px-2">
-                        <MoreHorizontal className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" className="h-7 sm:h-8 px-1.5 sm:px-2">
+                        <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
