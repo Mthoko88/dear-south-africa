@@ -220,7 +220,7 @@ export function StoryRecommendations() {
 
         {/* Content */}
         {loading ? (
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="bg-gray-200 rounded-lg h-32"></div>
@@ -228,7 +228,7 @@ export function StoryRecommendations() {
             ))}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 scrollbar-thin">
             {activeTab === "recommended" && (
               <>
                 {recommendations.length === 0 ? (
@@ -248,7 +248,7 @@ export function StoryRecommendations() {
                         </span>
                       </div>
                       <div onClick={() => recordStoryView(story.id)}>
-                        <StoryCard story={story} />
+                        <StoryCard story={story} variant="discover" />
                       </div>
                     </div>
                   ))
@@ -273,7 +273,7 @@ export function StoryRecommendations() {
                         <span className="text-xs text-muted-foreground">{story.upvotes} upvotes this week</span>
                       </div>
                       <div onClick={() => recordStoryView(story.id)}>
-                        <StoryCard story={story} />
+                        <StoryCard story={story} variant="discover" />
                       </div>
                     </div>
                   ))
