@@ -346,21 +346,22 @@ export default function OrganisationProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
                 {stories.map((story) => (
-                  <StoryCard
-                    key={story.id}
-                    story={{
-                      ...story,
-                      organisations: {
-                        id: organisation.id,
-                        trading_name: organisation.trading_name,
-                        logo_url: organisation.logo_url,
-                        organisation_type: organisation.organisation_type,
-                        is_verified: organisation.is_verified
-                      }
-                    }}
-                  />
+                  <div key={story.id} className="flex">
+                    <StoryCard
+                      story={{
+                        ...story,
+                        organisations: {
+                          id: organisation.id,
+                          trading_name: organisation.trading_name,
+                          logo_url: organisation.logo_url,
+                          organisation_type: organisation.organisation_type,
+                          is_verified: organisation.is_verified
+                        }
+                      }}
+                    />
+                  </div>
                 ))}
               </div>
             )}

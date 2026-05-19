@@ -531,10 +531,10 @@ export function StoryCard({ story }: StoryCardProps) {
 
   return (
     <>
-      <div role="link" tabIndex={0} onClick={goToStory} onKeyDown={(e) => e.key === "Enter" && router.push(`/story/${story.id}`)}>
-        <Card className="hover:shadow-md transition-shadow duration-200 cursor-pointer mb-5">
+      <div role="link" tabIndex={0} onClick={goToStory} onKeyDown={(e) => e.key === "Enter" && router.push(`/story/${story.id}`)} className="h-full w-full">
+        <Card className="hover:shadow-md transition-shadow duration-200 cursor-pointer mb-5 h-full flex flex-col">
           <CardHeader className="pb-3">
-            <div className="flex items-start sm:flex-col justify-between gap-3">
+            <div className="flex items-start justify-between gap-3">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
                 {/* Organisation posts */}
                 {story.organisations && story.organisations.id ? (
@@ -580,9 +580,10 @@ export function StoryCard({ story }: StoryCardProps) {
                       </div>
                       
                     </div>
-                     
+                    <div>
+                    
+                    </div>  
                   </>
-                   
                 ) : story.is_anonymous ? (
                   <>
                     <Avatar className="h-10 w-10 flex-shrink-0">
@@ -624,7 +625,6 @@ export function StoryCard({ story }: StoryCardProps) {
                       ) : (
                         <span className="font-medium block truncate">{getDisplayName(story.profiles)}</span>
                       )}
-                      
                       <div className="flex flex-col sm:flex-row sm:items-center text-xs text-muted-foreground gap-1 sm:gap-2">
                         <span className="whitespace-nowrap">{formatDistanceToNow(new Date(story.created_at))} ago</span>
                         {story.location && (
@@ -641,8 +641,8 @@ export function StoryCard({ story }: StoryCardProps) {
                   </>
                 )}
               </div>
-              <div className="flex flex-col gap-1.5 flex-shrink-0 items-end">
-                <Badge variant="secondary" className={`text-[10px] max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
+              <div className="flex flex-col gap-1 flex-shrink-0 items-end">
+                <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 h-4 max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
                   <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
                 </Badge>
                 {story.content_warning && (
@@ -663,15 +663,15 @@ export function StoryCard({ story }: StoryCardProps) {
                 <OrganisationFollowButton 
                   organisationId={story.organisations.id} 
                   variant="outline"
-                  className="text-xs w-full"
+                  className="text-[10px] h-6 px-3 rounded-full"
                 />
               </div>
             )}
           </CardHeader>
 
-<CardContent className="pt-0">
-  <div className="space-y-3">
-  <h3 className="font-bold font-serif text-2xl hover:text-primary transition-colors line-clamp-2">{story.title}</h3>
+<CardContent className="pt-0 flex-1 flex flex-col">
+  <div className="space-y-3 flex-1 flex flex-col">
+  <h3 className="font-serif font-semibold text-2xl hover:text-primary transition-colors line-clamp-2">{story.title}</h3>
   {(story.cover_image || (story.media_urls && story.media_urls.length > 0)) && (
     <ImageGridPreview 
       images={story.media_urls || []} 
@@ -704,31 +704,34 @@ export function StoryCard({ story }: StoryCardProps) {
                 </div>
               )}
 
+              {/* Spacer to push footer to bottom */}
+              <div className="flex-1" />
+
               {/* Story stats */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-2 border-t gap-2 sm:gap-3">
-                <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-muted-foreground">
-                  <div className="flex items-center space-x-1">
-                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+              <div className="flex flex-row items-center justify-between pt-2 border-t gap-2 mt-auto">
+                <div className="flex items-center space-x-2 text-[10px] sm:text-xs text-muted-foreground">
+                  <div className="flex items-center space-x-0.5">
+                    <Eye className="h-3 w-3" />
                     <span>{story.view_count || 0}</span>
                   </div>
                   {!isVoiceStory && (
-                    <div className="flex items-center space-x-1">
-                      <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <span>{getReadingTime(safeContent)} min</span>
+                    <div className="flex items-center space-x-0.5 whitespace-nowrap">
+                      <Clock className="h-3 w-3" />
+                      <span>{getReadingTime(safeContent)}m</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-0.5">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={(e) => handleVote("upvote", e)}
                     disabled={loading}
-                    className={`h-7 sm:h-8 px-1.5 sm:px-2 ${userVote === "upvote" ? "text-green-600 bg-green-50" : ""}`}
+                    className={`h-6 px-1.5 ${userVote === "upvote" ? "text-green-600 bg-green-50" : ""}`}
                   >
-                    <ArrowUp className={`h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 ${userVote === "upvote" ? "fill-current" : ""}`} />
-                    <span className="text-[10px] sm:text-xs">{upvoteCount}</span>
+                    <ArrowUp className={`h-3 w-3 mr-0.5 ${userVote === "upvote" ? "fill-current" : ""}`} />
+                    <span className="text-[10px]">{upvoteCount}</span>
                   </Button>
 
                   <Button
@@ -736,21 +739,21 @@ export function StoryCard({ story }: StoryCardProps) {
                     size="sm"
                     onClick={(e) => handleVote("downvote", e)}
                     disabled={loading}
-                    className={`h-7 sm:h-8 px-1.5 sm:px-2 ${userVote === "downvote" ? "text-red-600 bg-red-50" : ""}`}
+                    className={`h-6 px-1.5 ${userVote === "downvote" ? "text-red-600 bg-red-50" : ""}`}
                   >
-                    <ArrowDown className={`h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 ${userVote === "downvote" ? "fill-current" : ""}`} />
-                    <span className="text-[10px] sm:text-xs">{downvoteCount}</span>
+                    <ArrowDown className={`h-3 w-3 mr-0.5 ${userVote === "downvote" ? "fill-current" : ""}`} />
+                    <span className="text-[10px]">{downvoteCount}</span>
                   </Button>
 
-                  <Button variant="ghost" size="sm" className="h-7 sm:h-8 px-1.5 sm:px-2">
-                    <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-0.5 sm:mr-1" />
-                    <span className="text-[10px] sm:text-xs">0</span>
+                  <Button variant="ghost" size="sm" className="h-6 px-1.5">
+                    <MessageCircle className="h-3 w-3 mr-0.5" />
+                    <span className="text-[10px]">0</span>
                   </Button>
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="sm" className="h-7 sm:h-8 px-1.5 sm:px-2">
-                        <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <Button variant="ghost" size="sm" className="h-6 px-1.5">
+                        <MoreHorizontal className="h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
@@ -782,7 +785,7 @@ export function StoryCard({ story }: StoryCardProps) {
             <DialogTitle>Share Story</DialogTitle>
             <DialogDescription>Choose a platform to share this story</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 text-xs gap-3 py-4">
+          <div className="grid grid-cols-2 gap-3 py-4">
             <Button
               variant="outline"
               className="flex flex-col items-center gap-2 h-auto py-4 bg-transparent"
