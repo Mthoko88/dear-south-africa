@@ -679,7 +679,7 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
 
             {/* Organisation Follow Button - moved outside header */}
             {story.organisations?.id && (
-              <div onClick={(e) => e.stopPropagation()} className="pt-4 border-t">
+              <div onClick={(e) => e.stopPropagation()} className="pt-4 border-t mt-6">
                 <OrganisationFollowButton 
                   organisationId={story.organisations.id} 
                   variant="outline"
