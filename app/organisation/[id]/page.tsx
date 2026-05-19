@@ -350,7 +350,6 @@ export default function OrganisationProfilePage() {
                 {stories.map((story) => (
                   <StoryCard
                     key={story.id}
-                    compact={true}
                     story={{
                       ...story,
                       organisations: {
