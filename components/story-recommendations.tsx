@@ -188,33 +188,33 @@ export function StoryRecommendations() {
       </CardHeader>
       <CardContent>
         {/* Tab Navigation */}
-        <div className="flex space-x-1 mb-6 bg-muted p-1 rounded-lg">
+        <div className="flex mb-6 bg-muted p-1 rounded-lg overflow-hidden">
           <Button
             variant={activeTab === "recommended" ? "default" : "ghost"}
             size="sm"
             onClick={() => setActiveTab("recommended")}
-            className="flex-1"
+            className="flex-1 min-w-0 px-2 text-xs"
           >
-            <Heart className="h-4 w-4 mr-2" />
-            For You
+            <Heart className="h-3 w-3 mr-1 flex-shrink-0" />
+            <span className="truncate">For You</span>
           </Button>
           <Button
             variant={activeTab === "trending" ? "default" : "ghost"}
             size="sm"
             onClick={() => setActiveTab("trending")}
-            className="flex-1"
+            className="flex-1 min-w-0 px-2 text-xs"
           >
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Trending
+            <TrendingUp className="h-3 w-3 mr-1 flex-shrink-0" />
+            <span className="truncate">Trending</span>
           </Button>
           <Button
             variant={activeTab === "similar" ? "default" : "ghost"}
             size="sm"
             onClick={() => setActiveTab("similar")}
-            className="flex-1"
+            className="flex-1 min-w-0 px-2 text-xs"
           >
-            <Users className="h-4 w-4 mr-2" />
-            Similar
+            <Users className="h-3 w-3 mr-1 flex-shrink-0" />
+            <span className="truncate">Similar</span>
           </Button>
         </div>
 
