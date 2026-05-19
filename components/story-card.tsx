@@ -683,7 +683,7 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                 <OrganisationFollowButton 
                   organisationId={story.organisations.id} 
                   variant="outline"
-                  className="text-[10px] h-4 px-2 rounded-full"
+                  className="text-[8px] h-4 px-8 rounded-full"
                 />
               </div>
             )}
