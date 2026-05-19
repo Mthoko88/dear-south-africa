@@ -160,7 +160,7 @@ export function OrganisationFollowButton({
 
   // Button variant
   return (
-    <div className={`flex items-center gap-1 mt-2 rounded-full ${className}`}>
+    <div className={`flex items-center gap-1 rounded-full ${className}`}>
       <Button
         variant={isFollowing ? "outline" : "default"}
         size={size}
@@ -177,7 +177,7 @@ export function OrganisationFollowButton({
         {isFollowing ? "Following" : "Follow"}
       </Button>
       {showCount && (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           {followerCount} {followerCount === 1 ? "follower" : "followers"}
         </span>
       )}
