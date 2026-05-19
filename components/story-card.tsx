@@ -679,11 +679,11 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
 
             {/* Organisation Follow Button - moved outside header */}
             {story.organisations?.id && (
-              <div onClick={(e) => e.stopPropagation()} className="pt-2 border-t">
+              <div onClick={(e) => e.stopPropagation()} className="pt-4 pb-4 border-t">
                 <OrganisationFollowButton 
                   organisationId={story.organisations.id} 
                   variant="outline"
-                  className="text-[8px] h-4 px-2 py-6 border-rounded"
+                  className="text-sm h-4 py-4 border-rounded-300"
                 />
               </div>
             )}
@@ -750,7 +750,7 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                     disabled={loading}
                     className={`h-6 px-1 ${userVote === "upvote" ? "text-green-600 bg-green-50" : ""}`}
                   >
-                    <ArrowUp className={`h-3 w-3 mr-0.5 ${userVote === "upvote" ? "fill-current" : ""}`} />
+                    <ArrowUp className={`h-3 w-3 mr-0.3 ${userVote === "upvote" ? "fill-current" : ""}`} />
                     <span className="text-[10px]">{upvoteCount}</span>
                   </Button>
 
@@ -761,11 +761,11 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                     disabled={loading}
                     className={`h-6 px-1 ${userVote === "downvote" ? "text-red-600 bg-red-50" : ""}`}
                   >
-                    <ArrowDown className={`h-3 w-3 mr-0.5 ${userVote === "downvote" ? "fill-current" : ""}`} />
+                    <ArrowDown className={`h-3 w-3 mr-0.3 ${userVote === "downvote" ? "fill-current" : ""}`} />
                     <span className="text-[10px]">{downvoteCount}</span>
                   </Button>
 
-                  <Button variant="ghost" size="sm" className="h-6 px-1.5">
+                  <Button variant="ghost" size="sm" className="h-6 px-1">
                     <MessageCircle className="h-3 w-3 mr-0.5" />
                     <span className="text-[10px]">0</span>
                   </Button>
