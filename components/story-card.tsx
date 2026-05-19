@@ -625,20 +625,6 @@ export function StoryCard({ story }: StoryCardProps) {
                         <span className="font-medium block truncate">{getDisplayName(story.profiles)}</span>
                       )}
                       
-              <div className="flex flex-col gap-1.5 flex-shrink-0 items-end">
-                <Badge variant="secondary" className={`text-[10px] max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
-                  <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
-                </Badge>
-                {story.content_warning && (
-                  <Badge 
-                    variant="outline" 
-                    className={`text-[10px] px-1.5 py-0 h-4 max-w-[100px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color}`}
-                    title={`Content Warning: ${story.content_warning}`}
-                  >
-                    <span className="truncate">{"⚠️ "}{story.content_warning.length > 8 ? story.content_warning.slice(0, 8) + "..." : story.content_warning}</span>
-                  </Badge>
-                )}
-              </div>
                       <div className="flex flex-col sm:flex-row sm:items-center text-xs text-muted-foreground gap-1 sm:gap-2">
                         <span className="whitespace-nowrap">{formatDistanceToNow(new Date(story.created_at))} ago</span>
                         {story.location && (
@@ -653,6 +639,20 @@ export function StoryCard({ story }: StoryCardProps) {
                       </div>
                     </div>
                   </>
+                )}
+              </div>
+              <div className="flex flex-col gap-1.5 flex-shrink-0 items-end">
+                <Badge variant="secondary" className={`text-[10px] max-w-[100px] sm:max-w-none truncate ${getCategoryColor(safeCategory)}`}>
+                  <span className="truncate">{safeCategory.replace(/-/g, " ")}</span>
+                </Badge>
+                {story.content_warning && (
+                  <Badge 
+                    variant="outline" 
+                    className={`text-[10px] px-1.5 py-0 h-4 max-w-[100px] sm:max-w-none border ${getContentWarningSeverity(story.content_warning).color}`}
+                    title={`Content Warning: ${story.content_warning}`}
+                  >
+                    <span className="truncate">{"⚠️ "}{story.content_warning.length > 8 ? story.content_warning.slice(0, 8) + "..." : story.content_warning}</span>
+                  </Badge>
                 )}
               </div>
             </div>
