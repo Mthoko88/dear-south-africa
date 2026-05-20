@@ -168,11 +168,11 @@ export function OrganisationFollowButton({
         disabled={actionLoading}
       >
         {actionLoading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <Loader2 className="mr-1 h-2 w-2 animate-spin" />
         ) : isFollowing ? (
-          <UserCheck className="mr-2 h-4 w-4" />
+          <UserCheck className="mr-1 h-2 w-2" />
         ) : (
-          <UserPlus className="mr-2 h-4 w-4" />
+          <UserPlus className="mr-1 h-2 w-2" />
         )}
         {isFollowing ? "Following" : "Follow"}
       </Button>
