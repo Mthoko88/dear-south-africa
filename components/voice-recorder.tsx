@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Mic, Square, Trash2, Upload, Pause, Play, RotateCcw } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { Progress } from "@/components/ui/progress"
+import { upload } from "@vercel/blob/client"
 
 interface VoiceRecorderProps {
   onAudioReady: (audioUrl: string, duration: number) => void
@@ -19,6 +20,7 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
   const [duration, setDuration] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [audioLevels, setAudioLevels] = useState<number[]>([])
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -56,7 +58,23 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
       analyserRef.current.fftSize = 256
       source.connect(analyserRef.current)
       
-      const mediaRecorder = new MediaRecorder(stream)
+      // Use compressed audio format for smaller file sizes
+      let options: MediaRecorderOptions = {}
+      
+      // Try to use opus codec with lower bitrate for smaller files
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        options = { 
+          mimeType: 'audio/webm;codecs=opus',
+          audioBitsPerSecond: 32000 // 32kbps for voice - much smaller files
+        }
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        options = { 
+          mimeType: 'audio/mp4',
+          audioBitsPerSecond: 32000
+        }
+      }
+      
+      const mediaRecorder = new MediaRecorder(stream, options)
       mediaRecorderRef.current = mediaRecorder
       chunksRef.current = []
 
@@ -67,7 +85,10 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
       }
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" })
+        // Determine file extension based on mime type
+        const mimeType = mediaRecorder.mimeType || 'audio/webm'
+        const blob = new Blob(chunksRef.current, { type: mimeType })
+        console.log("[v0] Recording complete - Size:", (blob.size / 1024 / 1024).toFixed(2), "MB, Type:", mimeType)
         setAudioBlob(blob)
         const url = URL.createObjectURL(blob)
         setAudioUrl(url)
@@ -204,33 +225,44 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
     if (!audioBlob) return
 
     setIsUploading(true)
+    setUploadProgress(0)
+    
     try {
-      const formData = new FormData()
-      const fileName = `voice-story-${Date.now()}.webm`
-      formData.append("audio", audioBlob, fileName)
+      // Determine file extension based on mime type
+      const mimeType = audioBlob.type || 'audio/webm'
+      const extension = mimeType.includes('mp4') ? 'mp4' : 'webm'
+      const fileName = `voice-story-${Date.now()}.${extension}`
+      
+      console.log("[v0] Starting upload - File size:", (audioBlob.size / 1024 / 1024).toFixed(2), "MB")
 
-      const response = await fetch("/api/upload-audio", {
-        method: "POST",
-        body: formData,
+      // Use Vercel Blob client-side upload for much faster uploads
+      const blob = await upload(fileName, audioBlob, {
+        access: "public",
+        handleUploadUrl: "/api/upload-audio/client",
+        onUploadProgress: (progress) => {
+          const percent = Math.round((progress.loaded / progress.total) * 100)
+          setUploadProgress(percent)
+          console.log("[v0] Upload progress:", percent + "%")
+        },
       })
 
-      if (!response.ok) throw new Error("Upload failed")
-
-      const data = await response.json()
-      onAudioReady(data.url, duration)
+      console.log("[v0] Upload complete:", blob.url)
+      onAudioReady(blob.url, duration)
 
       toast({
         title: "Recording uploaded",
         description: "Now add a title for your story",
       })
     } catch (error) {
+      console.error("[v0] Upload error:", error)
       toast({
         title: "Upload failed",
-        description: "Please try recording again",
+        description: error instanceof Error ? error.message : "Please try recording again",
         variant: "destructive",
       })
     } finally {
       setIsUploading(false)
+      setUploadProgress(0)
     }
   }
 
@@ -352,7 +384,7 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
             <div className="text-lg font-semibold">Duration: {formatTime(duration)}</div>
 
             <div className="flex gap-3">
-              <Button onClick={deleteRecording} variant="outline" className="gap-2 bg-transparent">
+              <Button onClick={deleteRecording} variant="outline" className="gap-2 bg-transparent" disabled={isUploading}>
                 <Trash2 className="h-4 w-4" />
                 Delete & Re-record
               </Button>
@@ -362,6 +394,21 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
                 {isUploading ? "Uploading..." : "Use This Recording"}
               </Button>
             </div>
+
+            {/* Upload progress indicator */}
+            {isUploading && (
+              <div className="w-full max-w-md space-y-2">
+                <Progress value={uploadProgress} className="h-3" />
+                <p className="text-sm text-center text-muted-foreground">
+                  {uploadProgress < 100 
+                    ? `Uploading: ${uploadProgress}%` 
+                    : "Processing..."}
+                </p>
+                <p className="text-xs text-center text-muted-foreground">
+                  Large recordings may take a few minutes to upload
+                </p>
+              </div>
+            )}
           </>
         )}
       </div>
