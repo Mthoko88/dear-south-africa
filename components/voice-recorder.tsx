@@ -19,6 +19,7 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
   const [duration, setDuration] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [audioLevels, setAudioLevels] = useState<number[]>([])
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -204,19 +205,51 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
     if (!audioBlob) return
 
     setIsUploading(true)
+    setUploadProgress(0)
+    
     try {
       const formData = new FormData()
       const fileName = `voice-story-${Date.now()}.webm`
       formData.append("audio", audioBlob, fileName)
 
-      const response = await fetch("/api/upload-audio", {
-        method: "POST",
-        body: formData,
+      // Use XMLHttpRequest for upload progress tracking
+      const xhr = new XMLHttpRequest()
+      
+      const uploadPromise = new Promise<{ url: string }>((resolve, reject) => {
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 100)
+            setUploadProgress(progress)
+          }
+        })
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const data = JSON.parse(xhr.responseText)
+              resolve(data)
+            } catch {
+              reject(new Error("Invalid response"))
+            }
+          } else {
+            reject(new Error(`Upload failed with status ${xhr.status}`))
+          }
+        })
+
+        xhr.addEventListener("error", () => {
+          reject(new Error("Network error during upload"))
+        })
+
+        xhr.addEventListener("timeout", () => {
+          reject(new Error("Upload timed out"))
+        })
+
+        xhr.open("POST", "/api/upload-audio")
+        xhr.timeout = 600000 // 10 minute timeout for large files
+        xhr.send(formData)
       })
 
-      if (!response.ok) throw new Error("Upload failed")
-
-      const data = await response.json()
+      const data = await uploadPromise
       onAudioReady(data.url, duration)
 
       toast({
@@ -224,13 +257,15 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
         description: "Now add a title for your story",
       })
     } catch (error) {
+      console.error("Upload error:", error)
       toast({
         title: "Upload failed",
-        description: "Please try recording again",
+        description: error instanceof Error ? error.message : "Please try recording again",
         variant: "destructive",
       })
     } finally {
       setIsUploading(false)
+      setUploadProgress(0)
     }
   }
 
@@ -352,7 +387,7 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
             <div className="text-lg font-semibold">Duration: {formatTime(duration)}</div>
 
             <div className="flex gap-3">
-              <Button onClick={deleteRecording} variant="outline" className="gap-2 bg-transparent">
+              <Button onClick={deleteRecording} variant="outline" className="gap-2 bg-transparent" disabled={isUploading}>
                 <Trash2 className="h-4 w-4" />
                 Delete & Re-record
               </Button>
@@ -362,6 +397,21 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
                 {isUploading ? "Uploading..." : "Use This Recording"}
               </Button>
             </div>
+
+            {/* Upload progress indicator */}
+            {isUploading && (
+              <div className="w-full max-w-md space-y-2">
+                <Progress value={uploadProgress} className="h-3" />
+                <p className="text-sm text-center text-muted-foreground">
+                  {uploadProgress < 100 
+                    ? `Uploading: ${uploadProgress}%` 
+                    : "Processing..."}
+                </p>
+                <p className="text-xs text-center text-muted-foreground">
+                  Large recordings may take a few minutes to upload
+                </p>
+              </div>
+            )}
           </>
         )}
       </div>
