@@ -2,7 +2,6 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { GoogleAnalyticsClient } from "@/components/google-analytics"
-import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { AuthProvider } from "@/lib/auth-context"
 import { Toaster } from "@/components/ui/toaster"
@@ -42,7 +41,6 @@ export default function RootLayout({
             <CookieConsent />
           </AuthProvider>
         </ThemeProvider>
-        <Analytics />
         {GA_MEASUREMENT_ID && <GoogleAnalyticsClient gaId={GA_MEASUREMENT_ID} />}
       </body>
     </html>

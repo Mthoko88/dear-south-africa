@@ -28,7 +28,7 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
   const analyserRef = useRef<AnalyserNode | null>(null)
   const animationFrameRef = useRef<number | null>(null)
 
-  const MAX_DURATION = 300 // 5 minutes max
+  const MAX_DURATION = 1800 // 30 minutes max
 
   useEffect(() => {
     return () => {
@@ -340,7 +340,7 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
                   <li>Find a quiet space</li>
                   <li>Speak clearly and at a natural pace</li>
                   <li>You can pause and resume anytime</li>
-                  <li>Maximum recording length: 5 minutes</li>
+                  <li>Maximum recording length: 30 minutes</li>
                 </ul>
               </div>
             )}
