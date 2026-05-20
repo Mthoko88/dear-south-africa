@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Mic, Square, Trash2, Upload, Pause, Play, RotateCcw } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { Progress } from "@/components/ui/progress"
+import { upload } from "@vercel/blob/client"
 
 interface VoiceRecorderProps {
   onAudioReady: (audioUrl: string, duration: number) => void
@@ -57,7 +58,23 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
       analyserRef.current.fftSize = 256
       source.connect(analyserRef.current)
       
-      const mediaRecorder = new MediaRecorder(stream)
+      // Use compressed audio format for smaller file sizes
+      let options: MediaRecorderOptions = {}
+      
+      // Try to use opus codec with lower bitrate for smaller files
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        options = { 
+          mimeType: 'audio/webm;codecs=opus',
+          audioBitsPerSecond: 32000 // 32kbps for voice - much smaller files
+        }
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        options = { 
+          mimeType: 'audio/mp4',
+          audioBitsPerSecond: 32000
+        }
+      }
+      
+      const mediaRecorder = new MediaRecorder(stream, options)
       mediaRecorderRef.current = mediaRecorder
       chunksRef.current = []
 
@@ -68,7 +85,10 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
       }
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" })
+        // Determine file extension based on mime type
+        const mimeType = mediaRecorder.mimeType || 'audio/webm'
+        const blob = new Blob(chunksRef.current, { type: mimeType })
+        console.log("[v0] Recording complete - Size:", (blob.size / 1024 / 1024).toFixed(2), "MB, Type:", mimeType)
         setAudioBlob(blob)
         const url = URL.createObjectURL(blob)
         setAudioUrl(url)
@@ -208,56 +228,33 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
     setUploadProgress(0)
     
     try {
-      const formData = new FormData()
-      const fileName = `voice-story-${Date.now()}.webm`
-      formData.append("audio", audioBlob, fileName)
-
-      // Use XMLHttpRequest for upload progress tracking
-      const xhr = new XMLHttpRequest()
+      // Determine file extension based on mime type
+      const mimeType = audioBlob.type || 'audio/webm'
+      const extension = mimeType.includes('mp4') ? 'mp4' : 'webm'
+      const fileName = `voice-story-${Date.now()}.${extension}`
       
-      const uploadPromise = new Promise<{ url: string }>((resolve, reject) => {
-        xhr.upload.addEventListener("progress", (event) => {
-          if (event.lengthComputable) {
-            const progress = Math.round((event.loaded / event.total) * 100)
-            setUploadProgress(progress)
-          }
-        })
+      console.log("[v0] Starting upload - File size:", (audioBlob.size / 1024 / 1024).toFixed(2), "MB")
 
-        xhr.addEventListener("load", () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const data = JSON.parse(xhr.responseText)
-              resolve(data)
-            } catch {
-              reject(new Error("Invalid response"))
-            }
-          } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`))
-          }
-        })
-
-        xhr.addEventListener("error", () => {
-          reject(new Error("Network error during upload"))
-        })
-
-        xhr.addEventListener("timeout", () => {
-          reject(new Error("Upload timed out"))
-        })
-
-        xhr.open("POST", "/api/upload-audio")
-        xhr.timeout = 600000 // 10 minute timeout for large files
-        xhr.send(formData)
+      // Use Vercel Blob client-side upload for much faster uploads
+      const blob = await upload(fileName, audioBlob, {
+        access: "public",
+        handleUploadUrl: "/api/upload-audio/client",
+        onUploadProgress: (progress) => {
+          const percent = Math.round((progress.loaded / progress.total) * 100)
+          setUploadProgress(percent)
+          console.log("[v0] Upload progress:", percent + "%")
+        },
       })
 
-      const data = await uploadPromise
-      onAudioReady(data.url, duration)
+      console.log("[v0] Upload complete:", blob.url)
+      onAudioReady(blob.url, duration)
 
       toast({
         title: "Recording uploaded",
         description: "Now add a title for your story",
       })
     } catch (error) {
-      console.error("Upload error:", error)
+      console.error("[v0] Upload error:", error)
       toast({
         title: "Upload failed",
         description: error instanceof Error ? error.message : "Please try recording again",
