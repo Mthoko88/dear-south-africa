@@ -15,9 +15,8 @@ export async function POST(request: Request): Promise<NextResponse> {
           maximumSizeInBytes: 500 * 1024 * 1024, // 500MB max
         }
       },
-      onUploadCompleted: async ({ blob }) => {
-        console.log("Audio upload completed:", blob.url)
-      },
+      // Remove onUploadCompleted as it requires webhook configuration
+      // and can cause the upload to hang waiting for callback
     })
 
     return NextResponse.json(jsonResponse)
