@@ -42,23 +42,16 @@ export default function HomePage() {
         <main className="flex-1 p-4 md:p-6 space-y-6 max-w-5xl">
           {/* Welcome Section */}
           <div className="text-center space-y-4 py-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">Welcome to Dear South Africa</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              A safe space where ordinary South Africans share their stories, connect with others, and find healing
-              through community support.
-            </p>
-
+           
             <div className="pt-4">
               <CreateStoryButton />
-              <p className="text-sm text-muted-foreground mt-2">
-                Share your story and help someone else feel less alone
-              </p>
+              
             </div>
           </div>
 
           {/* Main Content */}
           <Tabs defaultValue="stories" className="w-full">
-            <TabsList className="w-full flex h-9">
+            {/* <TabsList className="w-full flex h-9">
               <TabsTrigger value="stories" className="flex-1 flex items-center justify-center gap-1 text-[10px] sm:text-xs px-1 sm:px-3 h-7">
                 <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                 <span className="truncate">Stories</span>
@@ -75,7 +68,7 @@ export default function HomePage() {
                 <Heart className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                 <span className="truncate">Support</span>
               </TabsTrigger>
-            </TabsList>
+            </TabsList> */}
 
             <TabsContent value="stories" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
