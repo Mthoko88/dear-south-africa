@@ -10,21 +10,15 @@ export async function POST(request: Request): Promise<NextResponse> {
       request,
       onBeforeGenerateToken: async () => {
         // Authenticate user here if needed
+        // Allow all audio and video content types since browsers vary in how they report audio recordings
         return {
           allowedContentTypes: [
-            "audio/webm", 
-            "audio/mp4", 
-            "audio/ogg", 
-            "audio/mpeg", 
-            "audio/wav",
-            "video/webm",  // Chrome records audio as video/webm
-            "video/mp4",   // Some browsers use video/* for audio recordings
+            "audio/*",
+            "video/*",
           ],
           maximumSizeInBytes: 500 * 1024 * 1024, // 500MB max
         }
       },
-      // Remove onUploadCompleted as it requires webhook configuration
-      // and can cause the upload to hang waiting for callback
     })
 
     return NextResponse.json(jsonResponse)
