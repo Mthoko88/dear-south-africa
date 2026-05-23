@@ -530,6 +530,9 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
   }
 
   const formatDuration = (seconds: number) => {
+    if (!isFinite(seconds) || isNaN(seconds) || seconds < 0) {
+      return "0:00"
+    }
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
     return `${mins}:${secs.toString().padStart(2, "0")}`
@@ -585,8 +588,12 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
 
   const handleLoadedMetadata = useCallback(() => {
     if (!audioRef.current) return
-    setDuration(audioRef.current.duration)
-    setIsAudioLoaded(true)
+    const audioDuration = audioRef.current.duration
+    // Check for valid duration (not NaN, not Infinity)
+    if (isFinite(audioDuration) && audioDuration > 0) {
+      setDuration(audioDuration)
+      setIsAudioLoaded(true)
+    }
   }, [])
 
   const handleAudioEnded = useCallback(() => {
@@ -594,6 +601,16 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
     setCurrentTime(0)
     if (audioRef.current) {
       audioRef.current.currentTime = 0
+    }
+  }, [])
+
+  // Handle duration change (sometimes metadata loads after initial load)
+  const handleDurationChange = useCallback(() => {
+    if (!audioRef.current) return
+    const audioDuration = audioRef.current.duration
+    if (isFinite(audioDuration) && audioDuration > 0) {
+      setDuration(audioDuration)
+      setIsAudioLoaded(true)
     }
   }, [])
 
@@ -779,6 +796,8 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                     preload="metadata"
                     onTimeUpdate={handleTimeUpdate}
                     onLoadedMetadata={handleLoadedMetadata}
+                    onDurationChange={handleDurationChange}
+                    onCanPlay={handleDurationChange}
                     onEnded={handleAudioEnded}
                     className="hidden"
                   />
@@ -812,8 +831,8 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                   {/* Progress bar */}
                   <div className="mb-3" onClick={(e) => e.stopPropagation()}>
                     <Slider
-                      value={[currentTime]}
-                      max={duration || 100}
+                      value={[isAudioLoaded && duration > 0 ? currentTime : 0]}
+                      max={isAudioLoaded && duration > 0 ? duration : 100}
                       step={0.1}
                       onValueChange={handleSeek}
                       className="w-full cursor-pointer"
