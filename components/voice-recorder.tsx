@@ -242,11 +242,12 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
         onUploadProgress: (progress) => {
           const percent = Math.round((progress.loaded / progress.total) * 100)
           setUploadProgress(percent)
-          console.log("[v0] Upload progress:", percent + "%")
         },
       })
 
       console.log("[v0] Upload complete:", blob.url)
+      
+      // Immediately call onAudioReady and show success
       onAudioReady(blob.url, duration)
 
       toast({
