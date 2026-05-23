@@ -1,12 +1,13 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MessageCircle, Share2, Bookmark, Eye, Clock, MapPin, ArrowUp, ArrowDown, Flag, Building2, CheckCircle, ExternalLink } from "lucide-react"
+import { MessageCircle, Share2, Bookmark, Eye, Clock, MapPin, ArrowUp, ArrowDown, Flag, Building2, CheckCircle, ExternalLink, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Mic } from "lucide-react"
+import { Slider } from "@/components/ui/slider"
 import { ReportStoryButton } from "@/components/report-story-button"
 import { ImageGridPreview } from "@/components/image-grid-preview"
 import { OrganisationFollowButton } from "@/components/organisation-follow-button"
@@ -199,6 +200,14 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
   const [loading, setLoading] = useState(false)
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false) // Added share dialog state
   const router = useRouter()
+
+  // Voice story player state
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [isMuted, setIsMuted] = useState(false)
+  const [isAudioLoaded, setIsAudioLoaded] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -522,9 +531,71 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
+    const secs = Math.floor(seconds % 60)
     return `${mins}:${secs.toString().padStart(2, "0")}`
   }
+
+  // Voice player handlers
+  const handlePlayPause = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!audioRef.current) return
+    
+    if (isPlaying) {
+      audioRef.current.pause()
+    } else {
+      audioRef.current.play()
+    }
+    setIsPlaying(!isPlaying)
+  }, [isPlaying])
+
+  const handleSeek = useCallback((value: number[]) => {
+    if (!audioRef.current) return
+    audioRef.current.currentTime = value[0]
+    setCurrentTime(value[0])
+  }, [])
+
+  const handleSkipBack = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!audioRef.current) return
+    audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10)
+  }, [])
+
+  const handleSkipForward = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!audioRef.current) return
+    audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + 10)
+  }, [duration])
+
+  const toggleMute = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!audioRef.current) return
+    audioRef.current.muted = !isMuted
+    setIsMuted(!isMuted)
+  }, [isMuted])
+
+  const handleTimeUpdate = useCallback(() => {
+    if (!audioRef.current) return
+    setCurrentTime(audioRef.current.currentTime)
+  }, [])
+
+  const handleLoadedMetadata = useCallback(() => {
+    if (!audioRef.current) return
+    setDuration(audioRef.current.duration)
+    setIsAudioLoaded(true)
+  }, [])
+
+  const handleAudioEnded = useCallback(() => {
+    setIsPlaying(false)
+    setCurrentTime(0)
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0
+    }
+  }, [])
 
   const safeContent = story.content || ""
   const safeCategory = story.category || "uncategorized"
@@ -533,7 +604,7 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
   return (
     <>
       <div role="link" tabIndex={0} onClick={goToStory} onKeyDown={(e) => e.key === "Enter" && router.push(`/story/${story.id}`)} className="h-full w-full">
-        <Card className="hover:shadow-md transition-shadow duration-200 cursor-pointer mb-5 h-full flex flex-col">
+        <Card className={`hover:shadow-md transition-shadow duration-200 cursor-pointer mb-5 h-full flex flex-col ${variant === "discover" ? "overflow-hidden" : ""}`}>
           <CardHeader className="pb-3">
             {/* Discover variant: badges above avatar */}
             {variant === "discover" && (
@@ -700,8 +771,112 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
   )}
 
               {isVoiceStory && story.audio_url ? (
-                <div className="bg-muted rounded-lg p-3">
-                  <audio src={story.audio_url} controls className="w-full" preload="metadata" />
+                <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-4 border border-primary/20" onClick={(e) => e.stopPropagation()}>
+                  {/* Hidden audio element */}
+                  <audio
+                    ref={audioRef}
+                    src={story.audio_url}
+                    preload="metadata"
+                    onTimeUpdate={handleTimeUpdate}
+                    onLoadedMetadata={handleLoadedMetadata}
+                    onEnded={handleAudioEnded}
+                    className="hidden"
+                  />
+                  
+                  {/* Voice story header */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Mic className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-primary">Voice Story</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {isAudioLoaded ? formatDuration(duration) : "Loading..."}
+                      </p>
+                    </div>
+                    {/* Mute button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={toggleMute}
+                      className="h-8 w-8 p-0 rounded-full"
+                    >
+                      {isMuted ? (
+                        <VolumeX className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Volume2 className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {/* Progress bar */}
+                  <div className="mb-3" onClick={(e) => e.stopPropagation()}>
+                    <Slider
+                      value={[currentTime]}
+                      max={duration || 100}
+                      step={0.1}
+                      onValueChange={handleSeek}
+                      className="w-full cursor-pointer"
+                      disabled={!isAudioLoaded}
+                    />
+                    <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                      <span>{formatDuration(currentTime)}</span>
+                      <span>{isAudioLoaded ? formatDuration(duration) : "--:--"}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Playback controls */}
+                  <div className="flex items-center justify-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSkipBack}
+                      disabled={!isAudioLoaded}
+                      className="h-9 w-9 p-0 rounded-full hover:bg-primary/10"
+                      title="Skip back 10 seconds"
+                    >
+                      <SkipBack className="h-4 w-4" />
+                    </Button>
+                    
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handlePlayPause}
+                      disabled={!isAudioLoaded}
+                      className="h-12 w-12 p-0 rounded-full"
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-5 w-5" />
+                      ) : (
+                        <Play className="h-5 w-5 ml-0.5" />
+                      )}
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSkipForward}
+                      disabled={!isAudioLoaded}
+                      className="h-9 w-9 p-0 rounded-full hover:bg-primary/10"
+                      title="Skip forward 10 seconds"
+                    >
+                      <SkipForward className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {/* Listening progress indicator */}
+                  {isAudioLoaded && currentTime > 0 && (
+                    <div className="mt-3 pt-3 border-t border-primary/10">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-muted-foreground">
+                          {Math.round((currentTime / duration) * 100)}% listened
+                        </span>
+                        <span className="text-muted-foreground">
+                          {formatDuration(duration - currentTime)} remaining
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="font-serif text-muted-foreground leading-relaxed line-clamp-3">{getPreviewContent(safeContent)}</p>
@@ -734,12 +909,17 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                     <Eye className="h-3 w-3" />
                     <span>{story.view_count || 0}</span>
                   </div>
-                  {!isVoiceStory && (
+                  {!isVoiceStory ? (
                     <div className="flex items-center space-x-0.5 whitespace-nowrap">
                       <Clock className="h-3 w-3" />
-                      <span>{getReadingTime(safeContent)}m</span>
+                      <span>{getReadingTime(safeContent)}m read</span>
                     </div>
-                  )}
+                  ) : isAudioLoaded ? (
+                    <div className="flex items-center space-x-0.5 whitespace-nowrap">
+                      <Mic className="h-3 w-3" />
+                      <span>{formatDuration(duration)}</span>
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="flex items-center gap-0.5">
@@ -770,13 +950,19 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                     <span className="text-[10px]">0</span>
                   </Button>
 
-                  <DropdownMenu>
+                  <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="sm" className="h-6 px-1.5">
+                      <Button variant="ghost" size="sm" className="h-6 px-1.5 flex-shrink-0">
                         <MoreHorizontal className="h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenuContent 
+                      align="end" 
+                      side={variant === "discover" ? "top" : "bottom"}
+                      sideOffset={5}
+                      onClick={(e) => e.stopPropagation()}
+                      className="z-50"
+                    >
                       <DropdownMenuItem onClick={handleBookmark}>
                         <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? "fill-current text-blue-500" : ""}`} />
                         {isBookmarked ? "Remove Bookmark" : "Bookmark"}
