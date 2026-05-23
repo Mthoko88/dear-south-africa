@@ -11,7 +11,15 @@ export async function POST(request: Request): Promise<NextResponse> {
       onBeforeGenerateToken: async () => {
         // Authenticate user here if needed
         return {
-          allowedContentTypes: ["audio/webm", "audio/mp4", "audio/ogg", "audio/mpeg", "audio/wav"],
+          allowedContentTypes: [
+            "audio/webm", 
+            "audio/mp4", 
+            "audio/ogg", 
+            "audio/mpeg", 
+            "audio/wav",
+            "video/webm",  // Chrome records audio as video/webm
+            "video/mp4",   // Some browsers use video/* for audio recordings
+          ],
           maximumSizeInBytes: 500 * 1024 * 1024, // 500MB max
         }
       },
