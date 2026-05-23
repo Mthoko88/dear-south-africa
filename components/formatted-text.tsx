@@ -11,11 +11,22 @@ export function FormattedText({ content, className = "" }: FormattedTextProps) {
   const containsHTML = /<[^>]+>/.test(content)
 
   if (containsHTML) {
+    // Sanitize HTML content to remove script tags and other potentially dangerous elements
+    const sanitizedContent = content
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<script[^>]*>/gi, '')
+      .replace(/<\/script>/gi, '')
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
+      .replace(/<embed[^>]*>/gi, '')
+      .replace(/on\w+="[^"]*"/gi, '') // Remove inline event handlers
+      .replace(/on\w+='[^']*'/gi, '')
+    
     // Render HTML content with dangerouslySetInnerHTML
     return (
       <div
         className={`prose prose-gray dark:prose-invert max-w-none story-content text-foreground ${className}`}
-        dangerouslySetInnerHTML={{ __html: content }}
+        dangerouslySetInnerHTML={{ __html: sanitizedContent }}
         style={{
           // Inline styles to ensure paragraph spacing is applied
           lineHeight: "1.75",
