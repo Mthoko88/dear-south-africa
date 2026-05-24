@@ -793,7 +793,7 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                   <audio
                     ref={audioRef}
                     src={story.audio_url}
-                    preload="metadata"
+                    preload="auto"
                     onTimeUpdate={handleTimeUpdate}
                     onLoadedMetadata={handleLoadedMetadata}
                     onDurationChange={handleDurationChange}
