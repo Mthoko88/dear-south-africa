@@ -12,15 +12,23 @@ export function FormattedText({ content, className = "" }: FormattedTextProps) {
 
   if (containsHTML) {
     // Sanitize HTML content to remove script tags and other potentially dangerous elements
-    const sanitizedContent = content
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<script[^>]*>/gi, '')
-      .replace(/<\/script>/gi, '')
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-      .replace(/<embed[^>]*>/gi, '')
-      .replace(/on\w+="[^"]*"/gi, '') // Remove inline event handlers
-      .replace(/on\w+='[^']*'/gi, '')
+    let sanitizedContent = content
+      // Remove script tags and their content
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<script[^>]*\/?>/gi, '')
+      // Remove noscript tags
+      .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
+      // Remove iframe, object, embed tags
+      .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+      .replace(/<iframe[^>]*\/?>/gi, '')
+      .replace(/<object[\s\S]*?<\/object>/gi, '')
+      .replace(/<embed[^>]*\/?>/gi, '')
+      // Remove event handlers
+      .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+      .replace(/\s*on\w+\s*=\s*[^\s>]+/gi, '')
+      // Remove javascript: URLs
+      .replace(/href\s*=\s*["']javascript:[^"']*["']/gi, '')
+      .replace(/src\s*=\s*["']javascript:[^"']*["']/gi, '')
     
     // Render HTML content with dangerouslySetInnerHTML
     return (
