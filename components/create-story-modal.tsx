@@ -18,7 +18,7 @@ import { VoiceRecorder } from "@/components/voice-recorder"
 import { RichTextEditor } from "@/components/rich-text-editor"
 import { AIRewriteAssistant } from "@/components/ai-rewrite-assistant"
 import { AICoverGenerator } from "@/components/ai-cover-generator"
-import { MediaUpload } from "@/components/media-upload"
+import { MediaUpload, type MediaItem } from "@/components/media-upload"
 import { LinkPreview } from "@/components/link-preview"
 import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
@@ -75,7 +75,7 @@ export function CreateStoryModal({ isOpen, onClose, onStoryCreated, initialStory
   const [showCoverGenerator, setShowCoverGenerator] = useState(false)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [userProfile, setUserProfile] = useState<{ ethnicity?: string | null; gender?: string | null; full_name?: string | null; is_admin?: boolean; organisation_id?: string | null }>({})
-  const [mediaImages, setMediaImages] = useState<string[]>([])
+  const [mediaImages, setMediaImages] = useState<MediaItem[]>([])
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [userOrganisation, setUserOrganisation] = useState<{ id: string; trading_name: string; logo_url?: string | null } | null>(null)
   const [postAsOrganisation, setPostAsOrganisation] = useState(false)
@@ -453,8 +453,8 @@ const handleAudioReady = (url: string, duration: number) => {
           upvotes: 0,
           downvotes: 0,
           view_count: 0,
-cover_image: coverImageUrl || (mediaImages.length > 0 ? mediaImages[0] : null),
-        media_urls: mediaImages.length > 0 ? mediaImages : null,
+          cover_image: coverImageUrl || (mediaImages.length > 0 ? mediaImages[0].url : null),
+          media_urls: mediaImages.length > 0 ? mediaImages : null,
           video_url: videoUrl || null,
           organisation_id: postAsOrganisation && userOrganisation ? userOrganisation.id : null,
           source_url: sourceUrl || null,

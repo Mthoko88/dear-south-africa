@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast"
 import { RichTextEditor } from "@/components/rich-text-editor"
 import { AICoverGenerator } from "@/components/ai-cover-generator"
 import { AIRewriteAssistant } from "@/components/ai-rewrite-assistant"
-import { MediaUpload } from "@/components/media-upload"
+import { MediaUpload, type MediaItem } from "@/components/media-upload"
 import { Sparkles, Plus } from "lucide-react"
 
 interface EditStoryModalProps {
@@ -61,7 +61,13 @@ export function EditStoryModal({ story, isOpen, onClose, onStoryUpdated }: EditS
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(story?.cover_image || null)
   const [userProfile, setUserProfile] = useState<{ ethnicity?: string | null; gender?: string | null; full_name?: string | null }>({})
   const [showAIAssistant, setShowAIAssistant] = useState(false)
-  const [mediaImages, setMediaImages] = useState<string[]>(story?.media_urls || [])
+  const [mediaImages, setMediaImages] = useState<MediaItem[]>(() => {
+    // Normalize existing media_urls to new format
+    const urls = story?.media_urls || []
+    return urls.map((item: string | MediaItem) => 
+      typeof item === 'string' ? { url: item, caption: null, credit: null } : item
+    )
+  })
   const [videoUrl, setVideoUrl] = useState<string | null>(story?.video_url || null)
 
   useEffect(() => {
@@ -75,7 +81,11 @@ export function EditStoryModal({ story, isOpen, onClose, onStoryUpdated }: EditS
       setCoverImageUrl(story.cover_image || null)
       setShowCoverGenerator(false)
       setShowAIAssistant(false)
-      setMediaImages(story.media_urls || [])
+      // Normalize media_urls to new format
+      const urls = story.media_urls || []
+      setMediaImages(urls.map((item: string | MediaItem) => 
+        typeof item === 'string' ? { url: item, caption: null, credit: null } : item
+      ))
       setVideoUrl(story.video_url || null)
     }
   }, [story])
@@ -321,7 +331,7 @@ export function EditStoryModal({ story, isOpen, onClose, onStoryUpdated }: EditS
           content_warning: contentWarning || null,
           is_anonymous: isAnonymous,
           location: location || null,
-          cover_image: coverImageUrl || (mediaImages.length > 0 ? mediaImages[0] : null),
+          cover_image: coverImageUrl || (mediaImages.length > 0 ? mediaImages[0].url : null),
           media_urls: mediaImages.length > 0 ? mediaImages : null,
           video_url: videoUrl || null,
         })
