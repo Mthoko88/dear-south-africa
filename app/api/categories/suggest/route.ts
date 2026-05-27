@@ -1,8 +1,18 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient()
+    
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      console.error("[v0] Category suggest auth error:", authError)
+      return NextResponse.json({ error: "You must be logged in to suggest a category" }, { status: 401 })
+    }
+    
     const { name, description } = await request.json()
 
     if (!name || !description) {
