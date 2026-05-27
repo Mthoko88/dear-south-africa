@@ -57,7 +57,8 @@ export function StoryRecommendations() {
         .from("stories")
         .select(`
           *,
-          profiles:user_id (username, full_name, avatar_url)
+          profiles:user_id (username, full_name, avatar_url),
+          organisations:organisation_id (id, trading_name, logo_url, organisation_type, is_verified)
         `)
         .neq("user_id", user.id)
         .order("created_at", { ascending: false })
@@ -131,7 +132,8 @@ export function StoryRecommendations() {
         .from("stories")
         .select(`
           *,
-          profiles:user_id (username, full_name, avatar_url)
+          profiles:user_id (username, full_name, avatar_url),
+          organisations:organisation_id (id, trading_name, logo_url, organisation_type, is_verified)
         `)
         .gte("created_at", sevenDaysAgo.toISOString())
         .order("upvotes", { ascending: false })
