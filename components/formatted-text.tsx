@@ -11,24 +11,50 @@ export function FormattedText({ content, className = "" }: FormattedTextProps) {
   const containsHTML = /<[^>]+>/.test(content)
 
   if (containsHTML) {
-    // Sanitize HTML content to remove script tags and other potentially dangerous elements
-    let sanitizedContent = content
-      // Remove script tags and their content
-      .replace(/<script[\s\S]*?<\/script>/gi, '')
-      .replace(/<script[^>]*\/?>/gi, '')
+    // Create a more robust sanitization function
+    const sanitizeHTML = (html: string): string => {
+      // First pass: remove script tags with any attributes and content
+      let clean = html
+      
+      // Remove all script tags (opening, closing, self-closing, with any attributes)
+      // Using a loop to handle nested or malformed tags
+      let prevLength = 0
+      while (clean.length !== prevLength) {
+        prevLength = clean.length
+        // Remove <script>...</script> blocks
+        clean = clean.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+        // Remove standalone <script> or <script /> tags
+        clean = clean.replace(/<script\b[^>]*\/?>/gi, '')
+        // Remove </script> tags
+        clean = clean.replace(/<\/script>/gi, '')
+      }
+      
       // Remove noscript tags
-      .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
-      // Remove iframe, object, embed tags
-      .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
-      .replace(/<iframe[^>]*\/?>/gi, '')
-      .replace(/<object[\s\S]*?<\/object>/gi, '')
-      .replace(/<embed[^>]*\/?>/gi, '')
-      // Remove event handlers
-      .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
-      .replace(/\s*on\w+\s*=\s*[^\s>]+/gi, '')
+      clean = clean.replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, '')
+      
+      // Remove iframe tags
+      clean = clean.replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, '')
+      clean = clean.replace(/<iframe\b[^>]*\/?>/gi, '')
+      
+      // Remove object and embed tags
+      clean = clean.replace(/<object\b[^>]*>[\s\S]*?<\/object>/gi, '')
+      clean = clean.replace(/<embed\b[^>]*\/?>/gi, '')
+      
+      // Remove all event handlers (onclick, onload, onerror, etc.)
+      clean = clean.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '')
+      clean = clean.replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '')
+      
       // Remove javascript: URLs
-      .replace(/href\s*=\s*["']javascript:[^"']*["']/gi, '')
-      .replace(/src\s*=\s*["']javascript:[^"']*["']/gi, '')
+      clean = clean.replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"')
+      clean = clean.replace(/src\s*=\s*["']javascript:[^"']*["']/gi, 'src=""')
+      
+      // Remove data: URLs in src (potential XSS vector)
+      clean = clean.replace(/src\s*=\s*["']data:text\/html[^"']*["']/gi, 'src=""')
+      
+      return clean
+    }
+    
+    const sanitizedContent = sanitizeHTML(content)
     
     // Render HTML content with dangerouslySetInnerHTML
     return (
