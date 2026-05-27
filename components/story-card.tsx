@@ -21,6 +21,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal } from "lucide-react"
 
+interface MediaItem {
+  url: string
+  caption?: string | null
+  credit?: string | null
+}
+
 interface Author {
   username?: string
   full_name?: string
@@ -44,7 +50,7 @@ interface StoryCardProps {
     user_id: string
     is_anonymous?: boolean
     cover_image?: string
-    media_urls?: string[] | null
+    media_urls?: (string | MediaItem)[] | null
     organisation_id?: string | null
     source_url?: string | null
     profiles?: {

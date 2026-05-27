@@ -4,10 +4,21 @@ import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
+interface MediaItem {
+  url: string
+  caption?: string | null
+  credit?: string | null
+}
+
 interface ImageGridPreviewProps {
-  images: string[]
+  images: (string | MediaItem)[]
   coverImage?: string | null
   className?: string
+}
+
+// Helper to extract URL from either string or MediaItem
+function getImageUrl(img: string | MediaItem): string {
+  return typeof img === 'string' ? img : img.url
 }
 
 function ImageWithLoader({ src, alt, className }: { src: string; alt: string; className?: string }) {
@@ -45,9 +56,10 @@ function ImageWithLoader({ src, alt, className }: { src: string; alt: string; cl
 
 export function ImageGridPreview({ images, coverImage, className }: ImageGridPreviewProps) {
   // Combine cover image with media images, avoiding duplicates
+  const imageUrls = images.map(getImageUrl)
   const allImages = coverImage 
-    ? [coverImage, ...images.filter(img => img !== coverImage)]
-    : images
+    ? [coverImage, ...imageUrls.filter(img => img !== coverImage)]
+    : imageUrls
 
   if (allImages.length === 0) return null
 

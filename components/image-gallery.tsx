@@ -7,10 +7,50 @@ import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
+export interface ImageMediaItem {
+  url: string
+  caption?: string | null
+  credit?: string | null
+}
+
 interface ImageGalleryProps {
-  images: string[]
+  images: (string | ImageMediaItem)[]
   coverImage?: string | null
   className?: string
+}
+
+// Helper to normalize image data (handles both string URLs and MediaItem objects)
+function normalizeImages(images: (string | ImageMediaItem)[], coverImage?: string | null): ImageMediaItem[] {
+  const normalized: ImageMediaItem[] = []
+  
+  // Add cover image first if it exists and isn't already in images
+  if (coverImage) {
+    const coverExists = images.some(img => 
+      (typeof img === 'string' ? img : img.url) === coverImage
+    )
+    if (!coverExists) {
+      normalized.push({ url: coverImage, caption: null, credit: null })
+    }
+  }
+  
+  // Add all images, converting strings to objects
+  for (const img of images) {
+    if (typeof img === 'string') {
+      // Skip if this is the cover image we already added
+      if (img === coverImage && normalized.length > 0 && normalized[0].url === coverImage) {
+        continue
+      }
+      normalized.push({ url: img, caption: null, credit: null })
+    } else {
+      // Skip if this is the cover image we already added
+      if (img.url === coverImage && normalized.length > 0 && normalized[0].url === coverImage) {
+        continue
+      }
+      normalized.push(img)
+    }
+  }
+  
+  return normalized
 }
 
 function ImageWithLoader({ 
@@ -62,14 +102,41 @@ function ImageWithLoader({
   )
 }
 
+// Caption/Credit overlay component for gallery view
+function ImageCaption({ caption, credit, compact = false }: { caption?: string | null; credit?: string | null; compact?: boolean }) {
+  if (!caption && !credit) return null
+  
+  return (
+    <div className={cn(
+      "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent",
+      compact ? "p-2" : "p-3 pb-4"
+    )}>
+      {caption && (
+        <p className={cn(
+          "text-white font-medium line-clamp-2",
+          compact ? "text-xs" : "text-sm"
+        )}>
+          {caption}
+        </p>
+      )}
+      {credit && (
+        <p className={cn(
+          "text-white/70 italic",
+          compact ? "text-[10px] mt-0.5" : "text-xs mt-1"
+        )}>
+          {credit}
+        </p>
+      )}
+    </div>
+  )
+}
+
 export function ImageGallery({ images, coverImage, className }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   
-  // Combine cover image with media images, avoiding duplicates
-  const allImages = coverImage 
-    ? [coverImage, ...images.filter(img => img !== coverImage)]
-    : images
+  // Normalize images to consistent format
+  const allImages = normalizeImages(images, coverImage)
 
   if (allImages.length === 0) return null
 
@@ -114,24 +181,38 @@ export function ImageGallery({ images, coverImage, className }: ImageGalleryProp
   const baseStyles = "rounded-xl overflow-hidden shadow-md ring-1 ring-black/5"
   const imageContainerStyles = "relative cursor-pointer group overflow-hidden"
 
-  // Single image - just show it full width
+  // Single image - show it full width with caption below
   if (allImages.length === 1) {
+    const img = allImages[0]
     return (
       <div className={cn("relative", className)}>
-        <div 
-          className={cn("relative aspect-video w-full", baseStyles, imageContainerStyles)}
-          onClick={() => openLightbox(0)}
-        >
-          <ImageWithLoader
-            src={allImages[0]}
-            alt="Story image"
-            className="transition-transform duration-500 group-hover:scale-105"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-            <ZoomIn className="h-10 w-10 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 drop-shadow-lg transform scale-75 group-hover:scale-100" />
+        <figure>
+          <div 
+            className={cn("relative aspect-video w-full", baseStyles, imageContainerStyles)}
+            onClick={() => openLightbox(0)}
+          >
+            <ImageWithLoader
+              src={img.url}
+              alt={img.caption || "Story image"}
+              className="transition-transform duration-500 group-hover:scale-105"
+              priority
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+              <ZoomIn className="h-10 w-10 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 drop-shadow-lg transform scale-75 group-hover:scale-100" />
+            </div>
           </div>
-        </div>
+          {/* Caption and credit displayed below image like a news site */}
+          {(img.caption || img.credit) && (
+            <figcaption className="mt-2 px-1">
+              {img.caption && (
+                <p className="text-sm text-foreground">{img.caption}</p>
+              )}
+              {img.credit && (
+                <p className="text-xs text-muted-foreground italic mt-0.5">{img.credit}</p>
+              )}
+            </figcaption>
+          )}
+        </figure>
 
         <LightboxDialog 
           images={allImages} 
@@ -157,17 +238,20 @@ export function ImageGallery({ images, coverImage, className }: ImageGalleryProp
               onClick={() => openLightbox(idx)}
             >
               <ImageWithLoader
-                src={img}
-                alt={`Story image ${idx + 1}`}
+                src={img.url}
+                alt={img.caption || `Story image ${idx + 1}`}
                 className="transition-transform duration-500 group-hover:scale-105"
                 priority={idx === 0}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
                 <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 drop-shadow-lg" />
               </div>
+              <ImageCaption caption={img.caption} credit={img.credit} compact />
             </div>
           ))}
         </div>
+        {/* Combined captions below for multi-image */}
+        <MultiImageCaptions images={allImages} />
         <LightboxDialog 
           images={allImages} 
           selectedIndex={selectedIndex} 
@@ -190,14 +274,15 @@ export function ImageGallery({ images, coverImage, className }: ImageGalleryProp
             onClick={() => openLightbox(0)}
           >
             <ImageWithLoader
-              src={allImages[0]}
-              alt="Story image 1"
+              src={allImages[0].url}
+              alt={allImages[0].caption || "Story image 1"}
               className="transition-transform duration-500 group-hover:scale-105"
               priority
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
               <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 drop-shadow-lg" />
             </div>
+            <ImageCaption caption={allImages[0].caption} credit={allImages[0].credit} compact />
           </div>
           <div className={cn("grid grid-rows-2", GAP)}>
             {allImages.slice(1).map((img, idx) => (
@@ -207,17 +292,19 @@ export function ImageGallery({ images, coverImage, className }: ImageGalleryProp
                 onClick={() => openLightbox(idx + 1)}
               >
                 <ImageWithLoader
-                  src={img}
-                  alt={`Story image ${idx + 2}`}
+                  src={img.url}
+                  alt={img.caption || `Story image ${idx + 2}`}
                   className="transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
                   <ZoomIn className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 drop-shadow-lg" />
                 </div>
+                <ImageCaption caption={img.caption} credit={img.credit} compact />
               </div>
             ))}
           </div>
         </div>
+        <MultiImageCaptions images={allImages} />
         <LightboxDialog 
           images={allImages} 
           selectedIndex={selectedIndex} 
@@ -241,8 +328,8 @@ export function ImageGallery({ images, coverImage, className }: ImageGalleryProp
             onClick={() => openLightbox(idx)}
           >
             <ImageWithLoader
-              src={img}
-              alt={`Story image ${idx + 1}`}
+              src={img.url}
+              alt={img.caption || `Story image ${idx + 1}`}
               className="transition-transform duration-500 group-hover:scale-105"
               priority={idx === 0}
             />
@@ -251,13 +338,17 @@ export function ImageGallery({ images, coverImage, className }: ImageGalleryProp
                 <span className="text-white text-3xl font-bold drop-shadow-lg">+{allImages.length - 4}</span>
               </div>
             ) : (
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-                <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 drop-shadow-lg" />
-              </div>
+              <>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+                  <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 drop-shadow-lg" />
+                </div>
+                <ImageCaption caption={img.caption} credit={img.credit} compact />
+              </>
             )}
           </div>
         ))}
       </div>
+      <MultiImageCaptions images={allImages.slice(0, 4)} />
       <LightboxDialog 
         images={allImages} 
         selectedIndex={selectedIndex} 
@@ -266,6 +357,36 @@ export function ImageGallery({ images, coverImage, className }: ImageGalleryProp
         onNext={goToNext}
         isAnimating={isAnimating}
       />
+    </div>
+  )
+}
+
+// Component to show combined credits for multi-image galleries
+function MultiImageCaptions({ images }: { images: ImageMediaItem[] }) {
+  // Collect unique credits
+  const credits = images
+    .map((img, idx) => img.credit ? { index: idx + 1, credit: img.credit } : null)
+    .filter(Boolean) as { index: number; credit: string }[]
+  
+  if (credits.length === 0) return null
+  
+  // If all credits are the same, show just once
+  const allSame = credits.every(c => c.credit === credits[0].credit)
+  
+  return (
+    <div className="mt-2 px-1">
+      <p className="text-xs text-muted-foreground italic">
+        {allSame ? (
+          credits[0].credit
+        ) : (
+          credits.map((c, idx) => (
+            <span key={c.index}>
+              {idx > 0 && " | "}
+              <span className="not-italic font-medium">{c.index}.</span> {c.credit}
+            </span>
+          ))
+        )}
+      </p>
     </div>
   )
 }
@@ -279,7 +400,7 @@ function LightboxDialog({
   onNext,
   isAnimating
 }: { 
-  images: string[]
+  images: ImageMediaItem[]
   selectedIndex: number | null
   onClose: () => void
   onPrevious: () => void
@@ -292,6 +413,8 @@ function LightboxDialog({
   useEffect(() => {
     setImageLoaded(false)
   }, [selectedIndex])
+
+  const currentImage = selectedIndex !== null ? images[selectedIndex] : null
 
   return (
     <Dialog open={selectedIndex !== null} onOpenChange={onClose}>
@@ -331,25 +454,39 @@ function LightboxDialog({
           </>
         )}
 
-        <div className="flex items-center justify-center w-full h-full p-4 min-h-[50vh]">
-          {selectedIndex !== null && (
-            <div className="relative">
-              {!imageLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+        <div className="flex flex-col items-center justify-center w-full h-full p-4 min-h-[50vh]">
+          {currentImage && (
+            <>
+              <div className="relative flex-1 flex items-center justify-center">
+                {!imageLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                  </div>
+                )}
+                <img
+                  src={currentImage.url}
+                  alt={currentImage.caption || `Story image ${(selectedIndex ?? 0) + 1}`}
+                  className={cn(
+                    "max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl transition-all duration-300",
+                    imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95",
+                    isAnimating && "opacity-80"
+                  )}
+                  onLoad={() => setImageLoaded(true)}
+                />
+              </div>
+              
+              {/* Caption and credit in lightbox */}
+              {(currentImage.caption || currentImage.credit) && (
+                <div className="mt-4 text-center max-w-2xl px-4">
+                  {currentImage.caption && (
+                    <p className="text-white text-sm md:text-base">{currentImage.caption}</p>
+                  )}
+                  {currentImage.credit && (
+                    <p className="text-white/60 text-xs md:text-sm italic mt-1">{currentImage.credit}</p>
+                  )}
                 </div>
               )}
-              <img
-                src={images[selectedIndex]}
-                alt={`Story image ${selectedIndex + 1}`}
-                className={cn(
-                  "max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl transition-all duration-300",
-                  imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95",
-                  isAnimating && "opacity-80"
-                )}
-                onLoad={() => setImageLoaded(true)}
-              />
-            </div>
+            </>
           )}
         </div>
 
