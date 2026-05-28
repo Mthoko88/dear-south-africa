@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { GoogleAnalyticsClient } from "@/components/google-analytics"
+import { GoogleAnalytics } from "@/components/google-analytics"
 import "./globals.css"
 import { AuthProvider } from "@/lib/auth-context"
 import { Toaster } from "@/components/ui/toaster"
@@ -31,6 +31,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {GA_MEASUREMENT_ID && <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />}
+      </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AutoTheme />
@@ -41,7 +44,6 @@ export default function RootLayout({
             <CookieConsent />
           </AuthProvider>
         </ThemeProvider>
-        {GA_MEASUREMENT_ID && <GoogleAnalyticsClient gaId={GA_MEASUREMENT_ID} />}
       </body>
     </html>
   )

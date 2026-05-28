@@ -1,37 +1,32 @@
-"use client"
-
-import { useEffect } from "react"
+import Script from "next/script"
 
 interface GoogleAnalyticsProps {
   gaId: string
 }
 
-export function GoogleAnalyticsClient({ gaId }: GoogleAnalyticsProps) {
-  useEffect(() => {
-    // Only run on client after hydration
-    if (typeof window === "undefined" || !gaId) return
+export function GoogleAnalytics({ gaId }: GoogleAnalyticsProps) {
+  if (!gaId) return null
 
-    // Check if already loaded
-    if (window.gtag) return
-
-    // Load the gtag script
-    const script = document.createElement("script")
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`
-    script.async = true
-    document.head.appendChild(script)
-
-    // Initialize gtag
-    window.dataLayer = window.dataLayer || []
-    function gtag(...args: any[]) {
-      window.dataLayer.push(args)
-    }
-    window.gtag = gtag
-    gtag("js", new Date())
-    gtag("config", gaId)
-  }, [gaId])
-
-  return null
+  return (
+    <>
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${gaId}');
+        `}
+      </Script>
+    </>
+  )
 }
+
+// Keep the old export name for backward compatibility
+export const GoogleAnalyticsClient = GoogleAnalytics
 
 // Extend Window interface for TypeScript
 declare global {
