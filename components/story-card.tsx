@@ -966,7 +966,7 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
               <div className="flex-1" />
 
               {/* Story stats */}
-              <div className={`pt-2 border-t gap-2 mt-auto ${variant === "feed" ? "flex flex-col items-stretch" : "flex flex-row items-center justify-between"}`}>
+              <div className={`pt-2 border-t gap-2 mt-auto ${variant === "discover" ? "flex flex-col items-stretch" : "flex flex-row items-center justify-between"}`}>
                 <div className="flex items-center space-x-2 text-[10px] sm:text-xs text-muted-foreground">
                   <div className="flex items-center space-x-0.5">
                     <Eye className="h-3 w-3" />
@@ -985,7 +985,7 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                   ) : null}
                 </div>
 
-                <div className={`flex items-center gap-0.5 ${variant === "feed" ? "justify-between w-full" : ""}`}>
+                <div className={`flex items-center gap-0.5 ${variant === "discover" ? "justify-between w-full" : ""}`}>
                   <Button
                     variant="ghost"
                     size="sm"
