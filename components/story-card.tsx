@@ -545,18 +545,24 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
   }
 
   // Voice player handlers
-  const handlePlayPause = useCallback((e: React.MouseEvent) => {
+  const handlePlayPause = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    
+
     if (!audioRef.current) return
-    
-    if (isPlaying) {
-      audioRef.current.pause()
-    } else {
-      audioRef.current.play()
+
+    try {
+      if (isPlaying) {
+        audioRef.current.pause()
+        setIsPlaying(false)
+      } else {
+        await audioRef.current.play()
+        setIsPlaying(true)
+      }
+    } catch (err) {
+      console.error("[v0] Story card audio play error:", err)
+      setIsPlaying(false)
     }
-    setIsPlaying(!isPlaying)
   }, [isPlaying])
 
   const handleSeek = useCallback((value: number[]) => {
@@ -592,15 +598,44 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
     setCurrentTime(audioRef.current.currentTime)
   }, [])
 
-  const handleLoadedMetadata = useCallback(() => {
-    if (!audioRef.current) return
-    const audioDuration = audioRef.current.duration
-    // Check for valid duration (not NaN, not Infinity)
+  // WebM recordings (from MediaRecorder) often report duration === Infinity
+  // until the browser is forced to seek to the end. This resolves the real duration.
+  const resolveDuration = useCallback(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const audioDuration = audio.duration
+
     if (isFinite(audioDuration) && audioDuration > 0) {
       setDuration(audioDuration)
       setIsAudioLoaded(true)
+      return
+    }
+
+    // Force the browser to compute the duration for streamed/WebM blobs
+    if (audioDuration === Infinity) {
+      const handleSeeked = () => {
+        if (!audioRef.current) return
+        const realDuration = audioRef.current.duration
+        if (isFinite(realDuration) && realDuration > 0) {
+          setDuration(realDuration)
+          setIsAudioLoaded(true)
+        }
+        audioRef.current.currentTime = 0
+        audioRef.current.removeEventListener("seeked", handleSeeked)
+      }
+      audio.addEventListener("seeked", handleSeeked)
+      try {
+        audio.currentTime = 1e101
+      } catch {
+        audio.removeEventListener("seeked", handleSeeked)
+      }
     }
   }, [])
+
+  const handleLoadedMetadata = useCallback(() => {
+    resolveDuration()
+  }, [resolveDuration])
 
   const handleAudioEnded = useCallback(() => {
     setIsPlaying(false)
@@ -612,13 +647,14 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
 
   // Handle duration change (sometimes metadata loads after initial load)
   const handleDurationChange = useCallback(() => {
-    if (!audioRef.current) return
-    const audioDuration = audioRef.current.duration
-    if (isFinite(audioDuration) && audioDuration > 0) {
-      setDuration(audioDuration)
-      setIsAudioLoaded(true)
-    }
-  }, [])
+    resolveDuration()
+  }, [resolveDuration])
+
+  // Mark audio as playable even if duration is still being resolved
+  const handleCanPlay = useCallback(() => {
+    setIsAudioLoaded(true)
+    resolveDuration()
+  }, [resolveDuration])
 
   const safeContent = story.content || ""
   const safeCategory = story.category || "uncategorized"
@@ -799,12 +835,14 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                   <audio
                     ref={audioRef}
                     src={story.audio_url}
-                    preload="auto"
+                    preload="metadata"
+                    crossOrigin="anonymous"
                     onTimeUpdate={handleTimeUpdate}
                     onLoadedMetadata={handleLoadedMetadata}
                     onDurationChange={handleDurationChange}
-                    onCanPlay={handleDurationChange}
+                    onCanPlay={handleCanPlay}
                     onEnded={handleAudioEnded}
+                    onError={() => setIsAudioLoaded(false)}
                     className="hidden"
                   />
                   
