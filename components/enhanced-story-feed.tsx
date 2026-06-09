@@ -180,7 +180,7 @@ export function EnhancedStoryFeed() {
       ) : (
         <div className="space-y-4">
           {filteredStories.map((story) => (
-            <StoryCard key={story.id} story={story} />
+            <StoryCard key={story.id} story={story} variant="feed" />
           ))}
         </div>
       )}
