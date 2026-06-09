@@ -66,7 +66,7 @@ interface StoryCardProps {
       is_verified: boolean
     } | null
   }
-  variant?: "default" | "discover" // Added variant prop
+  variant?: "default" | "discover" | "feed" // Added variant prop
 }
 
 function getEntryDate(dateString: string | null | undefined): string {
@@ -966,7 +966,7 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
               <div className="flex-1" />
 
               {/* Story stats */}
-              <div className="flex flex-row items-center justify-between pt-2 border-t gap-2 mt-auto">
+              <div className={`pt-2 border-t gap-2 mt-auto ${variant === "feed" ? "flex flex-col items-stretch" : "flex flex-row items-center justify-between"}`}>
                 <div className="flex items-center space-x-2 text-[10px] sm:text-xs text-muted-foreground">
                   <div className="flex items-center space-x-0.5">
                     <Eye className="h-3 w-3" />
@@ -985,7 +985,7 @@ export function StoryCard({ story, variant = "default" }: StoryCardProps) {
                   ) : null}
                 </div>
 
-                <div className="flex items-center gap-0.5">
+                <div className={`flex items-center gap-0.5 ${variant === "feed" ? "justify-between w-full" : ""}`}>
                   <Button
                     variant="ghost"
                     size="sm"
