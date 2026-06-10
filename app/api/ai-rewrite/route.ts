@@ -45,9 +45,9 @@ ${content}`
 
   try {
     const { text } = await generateText({
-      model: "openai/gpt-4o-mini",
+      model: "openai/gpt-5-mini",
       prompt,
-      maxTokens: 3000,
+      maxOutputTokens: 3000,
       temperature: 0.3, // Lower temperature for more consistent, focused rewrites
     })
 
