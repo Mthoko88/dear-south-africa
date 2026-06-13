@@ -16,12 +16,12 @@ export async function POST(req: Request) {
     }
 
     const result = await generateText({
-      model: "openai/gpt-5-mini",
+      model: "openai/gpt-4o-mini",
       prompt: `You are a helpful assistant for Dear South Africa, a storytelling platform. Generate a compelling, concise title (maximum 8 words) for the user's story. The title should capture the essence of their story while being engaging and emotionally resonant. Return ONLY the title, nothing else.
 
 Story content:
 ${content.substring(0, 1500)}`,
-      maxOutputTokens: 50,
+      maxOutputTokens: 100,
       temperature: 0.7,
     })
 
