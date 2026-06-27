@@ -88,7 +88,7 @@ export function Header() {
             </div>
 
             {/* Search */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-md mx-4" role="search">
+            <form onSubmit={handleSearch} className="hidden md:block flex-1 max-w-md md:mx-4" role="search">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -101,7 +101,7 @@ export function Header() {
             </form>
 
             {/* Right actions */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {user && (
                 <Link href="/connections" className="hidden sm:block">
                   <Button variant="ghost" size="sm">
@@ -202,8 +202,17 @@ export function Header() {
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => openAuthModal("signin")}>Sign In</Button>
-                  <Button onClick={() => openAuthModal("signup")}>Register</Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="px-2 sm:px-3"
+                    onClick={() => openAuthModal("signin")}
+                  >
+                    Sign In
+                  </Button>
+                  <Button size="sm" className="px-2 sm:px-3" onClick={() => openAuthModal("signup")}>
+                    Register
+                  </Button>
                 </>
               )}
             </div>

@@ -384,13 +384,18 @@ export function VoiceRecorder({ onAudioReady, onCancel }: VoiceRecorderProps) {
 
             <div className="text-lg font-semibold">Duration: {formatTime(duration)}</div>
 
-            <div className="flex gap-3">
-              <Button onClick={deleteRecording} variant="outline" className="gap-2 bg-transparent" disabled={isUploading}>
+            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+              <Button
+                onClick={deleteRecording}
+                variant="outline"
+                className="gap-2 bg-transparent w-full sm:w-auto"
+                disabled={isUploading}
+              >
                 <Trash2 className="h-4 w-4" />
                 Delete & Re-record
               </Button>
 
-              <Button onClick={uploadRecording} disabled={isUploading} className="gap-2">
+              <Button onClick={uploadRecording} disabled={isUploading} className="gap-2 w-full sm:w-auto">
                 <Upload className="h-4 w-4" />
                 {isUploading ? "Uploading..." : "Use This Recording"}
               </Button>
