@@ -171,7 +171,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         {showForgotPassword ? (
           <>
             <DialogHeader>
@@ -426,7 +426,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "signin" }: AuthModalP
 
               <TabsContent value="signup" className="space-y-4">
                 <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="signup-fullname">Full Name</Label>
                       <Input

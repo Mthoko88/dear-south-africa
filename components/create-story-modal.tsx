@@ -675,44 +675,44 @@ const handleAudioReady = (url: string, duration: number) => {
       />
 
       <Dialog open={isOpen && !showTypeSelector && !showLinkImport} onOpenChange={handleModalChange}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <div className="flex border-b">
             <button
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+              className={`flex-1 py-3 px-1 sm:px-4 text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === "share"
                   ? "border-b-2 border-primary text-foreground"
                   : "text-muted-foreground hover:text-foreground"
               }`}
               onClick={() => handleTabChange("share")}
             >
-              <div className="flex items-center justify-center gap-2">
-                <Share2 className="h-4 w-4" />
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+                <Share2 className="h-4 w-4 shrink-0" />
                 <span>Share Story</span>
               </div>
             </button>
             <button
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+              className={`flex-1 py-3 px-1 sm:px-4 text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === "draft"
                   ? "border-b-2 border-primary text-foreground"
                   : "text-muted-foreground hover:text-foreground"
               }`}
               onClick={() => handleTabChange("draft")}
             >
-              <div className="flex items-center justify-center gap-2">
-                <FileText className="h-4 w-4" />
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+                <FileText className="h-4 w-4 shrink-0" />
                 <span>Save Draft</span>
               </div>
             </button>
             <button
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+              className={`flex-1 py-3 px-1 sm:px-4 text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === "diary"
                   ? "border-b-2 border-primary text-foreground"
                   : "text-muted-foreground hover:text-foreground"
               }`}
               onClick={() => handleTabChange("diary")}
             >
-              <div className="flex items-center justify-center gap-2">
-                <BookOpen className="h-4 w-4" />
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+                <BookOpen className="h-4 w-4 shrink-0" />
                 <span>Diary Entry</span>
               </div>
             </button>
