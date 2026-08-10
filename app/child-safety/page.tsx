@@ -118,12 +118,6 @@ export default function ChildSafetyPage() {
                   </li>
                   <li>
                     Email our child safety team directly at{" "}
-                    <a href="mailto:childsafety@dearsa.africa" className="text-primary hover:underline">
-                      childsafety@dearsa.africa
-                    </a>
-                  </li>
-                  <li>
-                    Contact our Information Officer at{" "}
                     <a href="mailto:info@dearsa.africa" className="text-primary hover:underline">
                       info@dearsa.africa
                     </a>
@@ -205,12 +199,6 @@ export default function ChildSafetyPage() {
                   </p>
                   <p>
                     <strong>Child Safety Email:</strong>{" "}
-                    <a href="mailto:childsafety@dearsa.africa" className="text-primary hover:underline">
-                      childsafety@dearsa.africa
-                    </a>
-                  </p>
-                  <p>
-                    <strong>General Contact:</strong>{" "}
                     <a href="mailto:info@dearsa.africa" className="text-primary hover:underline">
                       info@dearsa.africa
                     </a>

@@ -206,8 +206,8 @@ export default function PrivacyPolicyPage() {
                   We maintain a <strong>zero-tolerance policy</strong> toward child sexual abuse and exploitation
                   (CSAE) and child sexual abuse material (CSAM). Suspected CSAE can be reported at any time using the
                   in-app &quot;Report&quot; button or by emailing{" "}
-                  <a href="mailto:childsafety@dearsa.africa" className="text-primary hover:underline">
-                    childsafety@dearsa.africa
+                  <a href="mailto:info@dearsa.africa" className="text-primary hover:underline">
+                    info@dearsa.africa
                   </a>
                   . Confirmed violations are removed, escalated to law enforcement, and reported to relevant
                   child-protection organizations.
