@@ -202,6 +202,23 @@ export default function PrivacyPolicyPage() {
                   We do not knowingly collect personal information from children under 18. If you believe a minor 
                   has created an account, please contact us immediately at info@dearsa.africa.
                 </p>
+                <p>
+                  We maintain a <strong>zero-tolerance policy</strong> toward child sexual abuse and exploitation
+                  (CSAE) and child sexual abuse material (CSAM). Suspected CSAE can be reported at any time using the
+                  in-app &quot;Report&quot; button or by emailing{" "}
+                  <a href="mailto:childsafety@dearsa.africa" className="text-primary hover:underline">
+                    childsafety@dearsa.africa
+                  </a>
+                  . Confirmed violations are removed, escalated to law enforcement, and reported to relevant
+                  child-protection organizations.
+                </p>
+                <p>
+                  For full details on how we prevent, detect, and respond to child exploitation, please read our{" "}
+                  <Link href="/child-safety" className="text-primary hover:underline font-medium">
+                    Child Safety Standards
+                  </Link>
+                  .
+                </p>
               </CardContent>
             </Card>
 
