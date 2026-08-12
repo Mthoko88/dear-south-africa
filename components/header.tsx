@@ -2,6 +2,7 @@
 
 import type React from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Search, User, LogOut, Settings, BookOpen, Users, TrendingUp, Menu, Mail, Shield, ShieldAlert, Building2 } from "lucide-react"
@@ -74,12 +75,14 @@ export function Header() {
 
               {/* Logo */}
               <Link href="/" className="flex items-center space-x-2">
-                <div className="bg-red-600 px-3 rounded-md mr-2">
-                  <div className="text-white font-bold text-sm leading-tighter">
-                    <div>Dear</div>
-                    <div className="text-2xl">SA</div>
-                  </div>
-                </div>
+                <Image
+                  src="/dear-sa-logo.png"
+                  alt="Dear South Africa logo"
+                  width={40}
+                  height={40}
+                  priority
+                  className="h-10 w-10 rounded-md mr-2"
+                />
                 <div className="hidden md:flex flex-col">
                   <span className="text-xl font-bold text-foreground">Dear South Africa</span>
                   <span className="text-xs text-muted-foreground">Share. Connect. Heal.</span>
