@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { Home, BookOpen, Users, TrendingUp, Heart, Settings, User, Bookmark, Calendar, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -28,14 +29,15 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center space-x-3">
-          <div className="bg-red-600 px-2 py-1 rounded-md">
-            <div className="text-white font-bold text-xs leading-tight">
-              <div>Dear</div>
-              <div className="text-lg">SA</div>
-            </div>
-          </div>
+          <Image
+            src="/dear-sa-logo.png"
+            alt="Dear SA"
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-md"
+          />
           <div className="flex flex-col">
-            <span className="font-bold text-sm">Dear South Africa</span>
+            <span className="font-bold text-sm">Dear SA</span>
             <span className="text-xs text-muted-foreground">Share. Connect. Heal.</span>
           </div>
         </div>

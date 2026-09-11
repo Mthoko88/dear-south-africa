@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -74,14 +75,16 @@ export function Header() {
 
               {/* Logo */}
               <Link href="/" className="flex items-center space-x-2">
-                <div className="bg-red-600 px-3 rounded-md mr-2">
-                  <div className="text-white font-bold text-sm leading-tighter">
-                    <div>Dear</div>
-                    <div className="text-2xl">SA</div>
-                  </div>
-                </div>
+                <Image
+                  src="/dear-sa-logo.png"
+                  alt="Dear SA"
+                  width={40}
+                  height={40}
+                  priority
+                  className="h-10 w-10 rounded-md"
+                />
                 <div className="hidden md:flex flex-col">
-                  <span className="text-xl font-bold text-foreground">Dear South Africa</span>
+                  <span className="text-xl font-bold text-foreground">Dear SA</span>
                   <span className="text-xs text-muted-foreground">Share. Connect. Heal.</span>
                 </div>
               </Link>
