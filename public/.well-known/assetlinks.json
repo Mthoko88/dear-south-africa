@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.dearsa.app",
+      "sha256_cert_fingerprints": [
+        "B0:30:9C:3A:C8:0F:D0:6F:79:5D:0D:FA:FF:44:B9:7F:CB:07:8D:B0:22:C1:C1:9D:11:FE:2A:3E:5B:2A:67:FA",
+        "F8:44:B3:29:39:AE:C7:69:5F:FC:7A:3B:C8:04:22:E7:F2:33:82:48:35:66:55:A9:38:03:58:82:3F:10:EA:C2"
+      ]
+    }
+  }
+]
