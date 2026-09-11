@@ -25,3 +25,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# android signing keys / secrets - NEVER commit these
+*.keystore
+*.jks
+signing-key-info*.txt
+*.p12
+*.pepk
