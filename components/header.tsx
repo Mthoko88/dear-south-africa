@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Search, User, LogOut, Settings, BookOpen, Users, TrendingUp, Menu, Mail, Shield, Building2 } from "lucide-react"
+import { Search, User, LogOut, Settings, BookOpen, Users, TrendingUp, Menu, Mail, Shield, ShieldAlert, Building2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -184,6 +184,13 @@ export function Header() {
                         <Link href="/privacy" className="flex items-center">
                           <Shield className="mr-2 h-4 w-4" />
                           Privacy Policy
+                        </Link>
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem asChild>
+                        <Link href="/child-safety" className="flex items-center">
+                          <ShieldAlert className="mr-2 h-4 w-4" />
+                          Child Safety Standards
                         </Link>
                       </DropdownMenuItem>
 
