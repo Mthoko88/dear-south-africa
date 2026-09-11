@@ -15,17 +15,28 @@ const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Dear South Africa - Share Your Story",
+  title: "Dear SA - Share Your Story",
   description: "A community platform for South Africans to share their stories, connect, and heal together.",
+  applicationName: "Dear SA",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/icon.png", sizes: "512x512", type: "image/png" },
-      { url: "/app-icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: "/apple-icon.png",
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Dear SA",
+    statusBarStyle: "default",
   },
     generator: 'v0.app'
+}
+
+export const viewport = {
+  themeColor: "#e11d2a",
 }
 
 export default function RootLayout({
