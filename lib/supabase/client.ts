@@ -21,6 +21,19 @@ export function createClient() {
     )
   }
 
-  browserClient = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  browserClient = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      // Keep the user signed in across app restarts (critical for the
+      // installed Android/PWA app so users don't re-login every launch).
+      persistSession: true,
+      // Silently refresh the access token using the long-lived refresh
+      // token whenever the app regains focus.
+      autoRefreshToken: true,
+      // Complete OAuth / email-confirmation redirects that land back in the app.
+      detectSessionInUrl: true,
+      // PKCE keeps a durable refresh token that survives cold app starts.
+      flowType: "pkce",
+    },
+  })
   return browserClient
 }
